@@ -158,8 +158,15 @@ function availableTargetCount(): number {
 function renderEnvironment(): void {
   if (state.environment) {
     setText(elements.appVersion, `Version ${state.environment.appVersion}`)
-    const platformName = state.environment.platform === 'win32' ? 'Windows' : state.environment.platform
-    setText(elements.platformLabel, `${platformName} · Electron desktop`)
+    const platformName =
+      state.environment.platform === 'win32'
+        ? 'Windows desktop'
+        : state.environment.platform === 'darwin'
+          ? 'macOS desktop'
+          : state.environment.platform === 'linux'
+            ? 'Linux desktop'
+            : 'Desktop app'
+    setText(elements.platformLabel, platformName)
 
     const detection = state.environment.captivate
     setText(

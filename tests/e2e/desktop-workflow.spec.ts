@@ -23,6 +23,15 @@ test('analyzes a course and exports both supported formats', async () => {
 
     await expect(page).toHaveTitle('Compos-a-toast')
     await expect(page.getByRole('heading', { name: 'Compos-a-toast' })).toBeVisible()
+    const brandLogo = page.locator('img.brand-icon')
+    await expect(brandLogo).toBeVisible()
+    expect(
+      await brandLogo.evaluate(
+        (image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0
+      )
+    ).toBe(true)
+    await expect(page.getByText('Windows desktop', { exact: true })).toBeVisible()
+    await expect(page.locator('body')).not.toContainText('Electron')
 
     const browserWindow = await electronApp.browserWindow(page)
     expect(await browserWindow.evaluate((window) => window.getMinimumSize())).toEqual([940, 680])

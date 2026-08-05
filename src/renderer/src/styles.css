@@ -130,36 +130,12 @@ input:disabled {
 }
 
 .brand-icon {
-  display: grid;
+  display: block;
   width: 20px;
   height: 20px;
-  grid-template-columns: repeat(3, 4px);
-  align-items: end;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px 0;
   border-radius: 4px;
-  color: var(--accent-text);
-  background: var(--accent);
-}
-
-.brand-icon span {
-  display: block;
-  width: 4px;
-  border-radius: 1px;
-  background: currentColor;
-}
-
-.brand-icon span:nth-child(1) {
-  height: 5px;
-}
-
-.brand-icon span:nth-child(2) {
-  height: 11px;
-}
-
-.brand-icon span:nth-child(3) {
-  height: 8px;
+  object-fit: cover;
+  flex: 0 0 auto;
 }
 
 .titlebar-status {
