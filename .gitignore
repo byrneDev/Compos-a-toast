@@ -18,6 +18,14 @@ exports/
 *.cptx
 *.zip
 
+# Signing credentials and local environment secrets must never be committed
+*.pfx
+*.p12
+*.key
+.env
+.env.*
+!.env.example
+
 # Local IDE and operating-system state
 .idea/
 .vscode/

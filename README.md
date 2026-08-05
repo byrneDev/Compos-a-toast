@@ -70,12 +70,15 @@ Useful scripts:
 
 ```powershell
 npm.cmd run dev                 # Electron + Vite development mode
+npm.cmd start                   # Build and launch with the development Electron runtime
 npm.cmd test                    # Unit tests
 npm.cmd run test:local-courses  # Read-only checks against ignored local samples
 npm.cmd run typecheck           # Main/preload/core and renderer TypeScript checks
 npm.cmd run build               # Production Electron build
-npm.cmd run package             # Unpacked desktop application
-npm.cmd run package:win         # Windows installer and portable executable
+npm.cmd run package             # Signed unpacked app; signing credentials required
+npm.cmd run package:unsigned    # Unsigned unpacked output for isolated inspection
+npm.cmd run package:win         # Signed Windows installer; signing credentials required
+npm.cmd run package:win:unsigned # Unsigned installer for isolated build inspection only
 ```
 
 For a saved WebStorm run configuration, choose **npm**, select this `package.json`,
@@ -95,6 +98,28 @@ required or committed.
 
 The native Captivate option remains disabled until its authoring adapter can create,
 save, reopen, and verify real `.cptx` files in a supported Captivate version.
+
+## Windows Smart App Control and signing
+
+Windows Smart App Control or an organization-managed App Control policy can block the
+unpacked application because electron-builder must modify Electron's executable and the
+result has no trusted publisher signature. `Unblock-File` does not fix an unsigned
+binary, and disabling Windows security is not the recommended development workflow.
+
+For local WebStorm development, use either:
+
+```powershell
+npm.cmd run dev
+# or, to exercise a production build locally:
+npm.cmd start
+```
+
+The `package` and `package:win` commands deliberately fail instead of publishing an
+unsigned Windows application. A distributable build requires an RSA code-signing
+certificate from a trusted provider (or an organization certificate explicitly trusted
+by its App Control policy), supplied through electron-builder's `WIN_CSC_LINK` and
+`WIN_CSC_KEY_PASSWORD` environment variables. Certificates and passwords must not be
+stored in this repository. See [Windows signing](docs/windows-signing.md).
 
 ## Repository data policy
 

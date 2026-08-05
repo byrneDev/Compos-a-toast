@@ -19,14 +19,17 @@
   ],
   "scripts": {
     "dev": "electron-vite dev",
+    "start": "npm run build && electron .",
     "build": "npm run typecheck && electron-vite build && node scripts/verify-build.mjs",
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:local-courses": "vitest run --config vitest.local.config.ts",
-    "package": "npm run build && electron-builder --dir",
-    "package:win": "npm run build && electron-builder --win"
+    "package": "npm run build && electron-builder --dir -c.forceCodeSigning=true",
+    "package:unsigned": "npm run build && electron-builder --dir",
+    "package:win": "npm run build && electron-builder --win -c.forceCodeSigning=true",
+    "package:win:unsigned": "npm run build && electron-builder --win"
   },
   "build": {
     "appId": "com.composatoast.desktop",
