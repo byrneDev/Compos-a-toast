@@ -165,9 +165,10 @@ export async function exportCourse(request: ExportRequestDto): Promise<ExportRes
       target: 'captivate',
       status: 'skipped',
       path: bundleResult.path,
-      message: captivate.detected
-        ? 'Captivate was detected, but the version-pinned authoring adapter is not implemented yet. A Captivate assembly job was written to the migration bundle.'
-        : `${captivate.reason ?? 'Captivate is unavailable.'} A Captivate assembly job was written to the migration bundle.`
+      message:
+        captivate.detected && captivate.adapterEligible
+          ? `Adobe Captivate Classic ${captivate.version ?? ''} is installed and verified, but the authoring adapter is still under development. A Captivate assembly job was written to the migration bundle.`
+          : `${captivate.reason ?? 'Captivate is unavailable.'} A Captivate assembly job was written to the migration bundle.`
     })
   }
 

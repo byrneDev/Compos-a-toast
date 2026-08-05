@@ -64,9 +64,11 @@ browser without an LMS during testing.
 
 ### `src/core/captivate`
 
-Currently detects Captivate and defines the future integration boundary. A real adapter
-must drive a supported Captivate installation to create native objects. It must not
-fabricate or patch undocumented `.cptx` internals.
+Detects the exact Captivate Classic product/build and verifies its Adobe signature. The
+open-smoke layer makes a hash-verified disposable CPTX copy and launches only that copy
+through the verified executable. A real adapter must drive a supported Captivate
+installation to create native objects. It must not fabricate or patch undocumented
+`.cptx` internals.
 
 ### `src/main`, `src/preload`, and `src/renderer`
 

@@ -8,6 +8,20 @@ export const IPC_CHANNELS = {
 
 export type ExportTarget = 'migration-bundle' | 'scorm12' | 'captivate'
 
+export type CaptivateProduct = 'classic' | 'modern' | 'unknown'
+
+export interface CaptivateDetectionDto {
+  detected: boolean
+  path?: string
+  product?: CaptivateProduct
+  version?: string
+  productName?: string
+  signatureVerified: boolean
+  versionSupported: boolean
+  adapterEligible: boolean
+  reason?: string
+}
+
 export interface DiagnosticDto {
   severity: 'info' | 'warning' | 'error'
   code: string
@@ -30,11 +44,7 @@ export interface CourseSummaryDto {
 export interface EnvironmentDto {
   appVersion: string
   platform: string
-  captivate: {
-    detected: boolean
-    path?: string
-    reason?: string
-  }
+  captivate: CaptivateDetectionDto
 }
 
 export interface ExportRequestDto {

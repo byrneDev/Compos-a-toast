@@ -19,6 +19,8 @@ All notable changes to Compos-a-toast will be documented here. The project follo
 - Windows 11 native caption controls, Mica backdrop support, and Windows 10,
   high-contrast, dark-theme, and reduced-transparency fallbacks.
 - Smart App Control-safe local launch workflow and fail-closed signed Windows packaging.
+- Signed, exact-build Captivate Classic detection and a hash-verified disposable CPTX
+  launch/open smoke-test foundation.
 - Synthetic unit fixtures and an optional read-only seven-course local integration suite.
 
 ### Known limitations
