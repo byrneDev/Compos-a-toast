@@ -28,3 +28,7 @@ https://www.imsglobal.org/xsd/index.html
 The files remain controlling documents of their respective standards bodies;
 vendoring them here makes generated packages self-contained and does not imply
 project ownership of the schemas.
+
+These documents are not covered by the repository's MIT license. See the root
+`THIRD_PARTY_NOTICES.md` for the publication blocker created by the applicable
+specification terms and these local compatibility changes.

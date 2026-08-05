@@ -1,0 +1,46 @@
+name: Feature request
+description: Propose a migration, reconstruction, SCORM, or Captivate capability.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Migration problem
+      description: What source behavior or workflow is not handled today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Format evidence
+      description: Describe the source structure using synthetic or publicly releasable evidence.
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired editable or runtime outcome
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Primary output
+      options:
+        - Editable migration bundle
+        - HTML5 SCORM 1.2
+        - Adobe Captivate Classic
+        - Analyzer or diagnostics
+        - Desktop application
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety boundary
+      options:
+        - label: The proposal can be implemented without executing legacy course code.
+          required: true

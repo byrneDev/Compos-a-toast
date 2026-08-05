@@ -171,6 +171,13 @@ modern emulator and remain optional.
 See [Architecture](docs/architecture.md) and
 [Captivate adapter contract](docs/captivate-adapter.md) for implementation boundaries.
 
+## Independence and trademarks
+
+Compos-a-toast is an independent open-source project. It is not affiliated with,
+sponsored by, certified by, or endorsed by Composica, Adobe, 1EdTech, ADL, or Rustici
+Software. Product and organization names are used only to identify formats and software
+with which this migration tool interoperates. See [third-party notices](THIRD_PARTY_NOTICES.md).
+
 ## License
 
 [MIT](LICENSE). This license applies to Compos-a-toast source code, not to any input

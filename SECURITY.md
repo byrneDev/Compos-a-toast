@@ -20,6 +20,7 @@ Particularly important findings include:
 - unsafe extraction of archive entries;
 - generated HTML that allows source scripts or event handlers to execute.
 
-Until a private security contact is configured for the public repository, open a public
-issue containing no exploit payload or sensitive course data and request a private
-maintainer contact.
+Use GitHub's private vulnerability-reporting feature after it is enabled for the public
+repository. If that feature is unavailable, open a public issue containing no technical
+details, exploit payload, customer data, or sensitive course material and request a
+private maintainer contact. Do not disclose the vulnerability itself in a public issue.

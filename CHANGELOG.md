@@ -21,6 +21,8 @@ All notable changes to Compos-a-toast will be documented here. The project follo
 - Smart App Control-safe local launch workflow and fail-closed signed Windows packaging.
 - Signed, exact-build Captivate Classic detection and a hash-verified disposable CPTX
   launch/open smoke-test foundation.
+- Windows continuous integration, Dependabot configuration, structured issue forms,
+  pull-request safety checks, support guidance, and third-party notices.
 - Synthetic unit fixtures and an optional read-only seven-course local integration suite.
 
 ### Known limitations

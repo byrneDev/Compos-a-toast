@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a reproducible problem using synthetic or releasable evidence.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not upload customer courses, proprietary assets, credentials, or exploit payloads.
+        Use the smallest synthetic reproduction possible.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: 0.1.0 or a commit SHA
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows version, Node.js version, and Captivate version if relevant
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Include a minimal synthetic fixture or exact folder shape when possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and diagnostics
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: data-policy
+    attributes:
+      label: Data-safety confirmation
+      options:
+        - label: I have removed customer, proprietary, personal, and confidential data.
+          required: true
+        - label: This report does not require running an HTA, ActiveX control, Flash file, or recovered script.
+          required: true

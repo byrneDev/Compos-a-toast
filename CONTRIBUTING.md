@@ -25,3 +25,18 @@ minimal synthetic fixtures that demonstrate the format behavior under test.
 - Record unsupported behavior as a diagnostic rather than silently approximating it.
 - For SCORM changes, test both standalone mode and an LMS API mock.
 - For future Captivate changes, include save/reopen/publish verification evidence.
+
+## Before submitting
+
+Run the same core checks used by continuous integration:
+
+```powershell
+npm.cmd ci
+npm.cmd test
+npm.cmd run build
+npm.cmd run test:e2e
+```
+
+The ignored local-course integration suite is optional and must never cause proprietary
+fixtures to enter a commit. See [support guidance](SUPPORT.md) and
+[third-party notices](THIRD_PARTY_NOTICES.md) before contributing external material.
