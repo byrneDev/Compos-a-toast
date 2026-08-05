@@ -25,6 +25,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
     "test:local-courses": "vitest run --config vitest.local.config.ts",
     "package": "npm run build && electron-builder --dir -c.forceCodeSigning=true",
     "package:unsigned": "npm run build && electron-builder --dir",
@@ -51,18 +52,14 @@
   "dependencies": {
     "adm-zip": "0.6.0",
     "fast-xml-parser": "5.10.1",
-    "htmlparser2": "12.0.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "htmlparser2": "12.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@types/adm-zip": "0.5.8",
     "@types/node": "26.1.2",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
-    "@vitejs/plugin-react": "5.2.0",
     "@vitest/coverage-v8": "4.1.10",
-    "electron": "43.2.0",
+    "electron": "43.3.0",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
     "typescript": "7.0.2",

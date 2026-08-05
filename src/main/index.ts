@@ -1,29 +1,78 @@
 import { join } from 'node:path'
-import { app, BrowserWindow, dialog, ipcMain, shell, type OpenDialogOptions } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  nativeTheme,
+  shell,
+  type OpenDialogOptions
+} from 'electron'
 import { detectCaptivate } from '../core/captivate/detect'
 import { analyzeCourse, exportCourse } from './course-service'
 import { IPC_CHANNELS, type ExportRequestDto } from '../shared/contracts'
+import {
+  createDesktopShellConfiguration,
+  createSecureRendererPreferences,
+  type NativeThemeSnapshot
+} from './windows-shell'
 
 let mainWindow: BrowserWindow | null = null
 
+function currentNativeTheme(): NativeThemeSnapshot {
+  return {
+    shouldUseDarkColors: nativeTheme.shouldUseDarkColors,
+    shouldUseHighContrastColors: nativeTheme.shouldUseHighContrastColors,
+    inForcedColorsMode: nativeTheme.inForcedColorsMode,
+    prefersReducedTransparency: nativeTheme.prefersReducedTransparency
+  }
+}
+
+function desktopShellConfiguration() {
+  return createDesktopShellConfiguration({
+    platform: process.platform,
+    osRelease: process.getSystemVersion(),
+    nativeTheme: currentNativeTheme()
+  })
+}
+
 function createWindow(): void {
+  const shellConfiguration = desktopShellConfiguration()
   mainWindow = new BrowserWindow({
-    width: 1180,
-    height: 820,
+    width: 1160,
+    height: 800,
     minWidth: 940,
     minHeight: 680,
     show: false,
-    backgroundColor: '#111827',
+    autoHideMenuBar: true,
     title: 'Compos-a-toast',
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true
-    }
+    ...shellConfiguration.windowOptions,
+    webPreferences: createSecureRendererPreferences(join(__dirname, '../preload/index.cjs'))
   })
 
   mainWindow.once('ready-to-show', () => mainWindow?.show())
+
+  const refreshSystemAppearance = (): void => {
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    const nextConfiguration = desktopShellConfiguration()
+    mainWindow.setBackgroundColor(nextConfiguration.windowOptions.backgroundColor ?? '#F3F3F3')
+
+    if (
+      nextConfiguration.windowsBuild !== null &&
+      nextConfiguration.windowsBuild >= 22_621
+    ) {
+      mainWindow.setBackgroundMaterial(nextConfiguration.usesMica ? 'mica' : 'none')
+    }
+
+    const titleBarOverlay = nextConfiguration.windowOptions.titleBarOverlay
+    if (typeof titleBarOverlay === 'object') mainWindow.setTitleBarOverlay(titleBarOverlay)
+  }
+
+  nativeTheme.on('updated', refreshSystemAppearance)
+  mainWindow.on('closed', () => {
+    nativeTheme.removeListener('updated', refreshSystemAppearance)
+    mainWindow = null
+  })
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) void shell.openExternal(url)
@@ -80,7 +129,11 @@ function registerIpc(): void {
   }))
 }
 
+app.enableSandbox()
+nativeTheme.themeSource = 'system'
+
 app.whenReady().then(() => {
+  if (process.platform === 'win32') app.setAppUserModelId('com.composatoast.desktop')
   registerIpc()
   createWindow()
 

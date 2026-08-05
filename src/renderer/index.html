@@ -4,14 +4,218 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' ws: http://localhost:*"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'nonce-composatoastrenderer'; img-src 'self' data:; font-src 'self'; connect-src 'self' ws://localhost:* http://localhost:*; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <title>Compos-a-toast</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="app-shell">
+      <header class="titlebar" aria-label="Application title bar">
+        <div class="brand-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <h1>Compos-a-toast</h1>
+        <span class="titlebar-status" id="titlebar-status">Ready</span>
+        <span class="titlebar-version" id="app-version">Version 0.1.0</span>
+      </header>
+
+      <div class="workspace">
+        <aside class="navigation-pane" aria-label="Workflow">
+          <div class="navigation-heading">Course migration</div>
+          <nav>
+            <a class="navigation-item is-current" href="#inspect-section" aria-current="step">
+              <span class="navigation-glyph" aria-hidden="true">1</span>
+              <span>Inspect</span>
+            </a>
+            <a class="navigation-item" id="rebuild-navigation" href="#rebuild-section" aria-disabled="true">
+              <span class="navigation-glyph" aria-hidden="true">2</span>
+              <span>Rebuild</span>
+            </a>
+            <a class="navigation-item" id="results-navigation" href="#results-section" aria-disabled="true">
+              <span class="navigation-glyph" aria-hidden="true">3</span>
+              <span>Results</span>
+            </a>
+          </nav>
+
+          <div class="local-note">
+            <span class="local-note-icon" aria-hidden="true">✓</span>
+            <div>
+              <strong>Local processing</strong>
+              <span>Legacy course code is never executed.</span>
+            </div>
+          </div>
+        </aside>
+
+        <main class="content-pane">
+          <div class="page-heading">
+            <div>
+              <p class="page-kicker">Migration workbench</p>
+              <h2>Recover a published Composica course</h2>
+              <p>Inspect the course, then create editable reconstruction files or an LMS-ready package.</p>
+            </div>
+            <div class="safe-badge"><span aria-hidden="true"></span>Static extraction</div>
+          </div>
+
+          <section class="settings-section" id="inspect-section" aria-labelledby="inspect-heading">
+            <div class="section-title">
+              <span class="section-number" aria-hidden="true">1</span>
+              <div>
+                <h2 id="inspect-heading">Inspect course</h2>
+                <p>Select the folder that contains the published course.</p>
+              </div>
+            </div>
+
+            <div class="settings-card source-card">
+              <div class="field-heading">
+                <label for="source-path">Published course folder</label>
+                <span class="recognized-label" id="recognized-label" hidden>Recognized</span>
+              </div>
+              <div class="path-row">
+                <input
+                  id="source-path"
+                  aria-label="Published course folder"
+                  placeholder="Choose the folder containing run.hta or Content\Projects\Res…"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <button class="button" id="browse-source" type="button">Browse…</button>
+                <button class="button primary" id="analyze-course" type="button">Analyze</button>
+              </div>
+
+              <div class="working-line" id="analysis-progress" role="status" hidden>
+                <span class="progress-ring" aria-hidden="true"></span>
+                Reading course structure and inventorying assets…
+              </div>
+
+              <article class="analysis-summary" id="analysis-summary" hidden>
+                <div class="course-heading">
+                  <div class="course-title-block">
+                    <p id="course-path"></p>
+                    <h3 id="course-title"></h3>
+                  </div>
+                  <span class="dimensions" id="course-dimensions"></span>
+                </div>
+
+                <div class="stats-grid" aria-label="Course inventory">
+                  <div class="stat"><strong id="slide-count">0</strong><span>Slides</span></div>
+                  <div class="stat"><strong id="question-count">0</strong><span>Questions</span></div>
+                  <div class="stat"><strong id="interaction-count">0</strong><span>Interactions</span></div>
+                  <div class="stat"><strong id="asset-count">0</strong><span>Assets</span></div>
+                  <div class="stat"><strong id="flash-count">0</strong><span>Flash files</span></div>
+                </div>
+
+                <details class="diagnostics" id="analysis-diagnostics" hidden>
+                  <summary id="analysis-diagnostics-summary">Analysis notes</summary>
+                  <ul id="analysis-diagnostics-list"></ul>
+                  <p class="diagnostic-overflow" id="analysis-diagnostics-overflow" hidden></p>
+                </details>
+              </article>
+            </div>
+          </section>
+
+          <section class="settings-section is-disabled" id="rebuild-section" aria-labelledby="rebuild-heading">
+            <div class="section-title">
+              <span class="section-number" aria-hidden="true">2</span>
+              <div>
+                <h2 id="rebuild-heading">Choose outputs</h2>
+                <p id="rebuild-hint">Analyze a course to continue.</p>
+              </div>
+            </div>
+
+            <div class="target-list" id="target-list" aria-label="Export formats" aria-disabled="true">
+              <button class="target-card is-selected" type="button" data-export-target="migration-bundle" aria-pressed="true">
+                <span class="target-icon folder-icon" aria-hidden="true"></span>
+                <span class="target-copy">
+                  <span class="target-kicker">Reconstruction source</span>
+                  <strong>Editable migration bundle</strong>
+                  <span>One folder per slide with objects, text, interactions, source evidence, and assets.</span>
+                </span>
+                <span class="target-check" aria-hidden="true">✓</span>
+              </button>
+
+              <button class="target-card" type="button" data-export-target="scorm12" aria-pressed="false">
+                <span class="target-icon package-icon" aria-hidden="true"></span>
+                <span class="target-copy">
+                  <span class="target-kicker">LMS-ready ZIP</span>
+                  <strong>HTML5 SCORM 1.2</strong>
+                  <span>A standalone HTML5 player with manifest, scoring, learner state, and resume support.</span>
+                </span>
+                <span class="target-check" aria-hidden="true"></span>
+              </button>
+
+              <button class="target-card is-pending" type="button" data-export-target="captivate" aria-pressed="false" disabled>
+                <span class="target-icon captivate-icon" aria-hidden="true">Cp</span>
+                <span class="target-copy">
+                  <span class="target-kicker">Native editable project</span>
+                  <strong>Adobe Captivate (.cptx)</strong>
+                  <span>Version-pinned Captivate automation will assemble native editable objects.</span>
+                  <span class="pending-label" id="captivate-status">Adapter in development · Checking this computer…</span>
+                </span>
+                <span class="target-check" aria-hidden="true"></span>
+              </button>
+            </div>
+
+            <div class="settings-card destination-card">
+              <label for="output-path">Export destination</label>
+              <div class="path-row">
+                <input
+                  id="output-path"
+                  aria-label="Export destination"
+                  placeholder="Choose a folder for generated bundles and packages…"
+                  autocomplete="off"
+                  spellcheck="false"
+                  disabled
+                />
+                <button class="button" id="browse-output" type="button" disabled>Browse…</button>
+              </div>
+            </div>
+
+            <div class="command-bar">
+              <div class="command-note">
+                <strong>No source files are modified.</strong>
+                <span>Exports are written to new folders and ZIP files.</span>
+              </div>
+              <button class="button primary build-button" id="build-outputs" type="button" disabled>
+                <span class="button-idle-label">Build selected outputs</span>
+                <span class="button-busy-label" hidden><span class="progress-ring" aria-hidden="true"></span>Converting…</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="message-card error-message" id="error-message" role="alert" hidden>
+            <span class="message-icon" aria-hidden="true">!</span>
+            <div>
+              <h2 id="error-heading" tabindex="-1">Something needs attention</h2>
+              <p id="error-text"></p>
+            </div>
+          </section>
+
+          <section class="settings-section result-section" id="results-section" aria-labelledby="results-heading" hidden>
+            <div class="section-title success-title">
+              <span class="section-number" aria-hidden="true">✓</span>
+              <div>
+                <p class="page-kicker">Finished</p>
+                <h2 id="results-heading" tabindex="-1">Conversion finished.</h2>
+                <p>Your new files are ready at the locations below.</p>
+              </div>
+            </div>
+            <div class="artifact-list" id="artifact-list"></div>
+            <details class="diagnostics export-diagnostics" id="export-diagnostics" hidden>
+              <summary id="export-diagnostics-summary">Export notes</summary>
+              <ul id="export-diagnostics-list"></ul>
+            </details>
+          </section>
+
+          <footer class="app-footer">
+            <span>Compos-a-toast is local-first and open source.</span>
+            <span id="platform-label">Electron desktop</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

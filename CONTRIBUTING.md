@@ -8,6 +8,7 @@ review than broad guesses about legacy behavior.
 ```powershell
 npm.cmd ci
 npm.cmd test
+npm.cmd run test:e2e
 npm.cmd run typecheck
 npm.cmd run dev
 ```

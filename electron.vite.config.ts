@@ -1,6 +1,5 @@
 import { resolve } from 'node:path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
@@ -28,11 +27,15 @@ export default defineConfig({
   },
   renderer: {
     root: resolve('src/renderer'),
+    html: {
+      // Vite applies this nonce to development-time style injection so the
+      // renderer can keep a restrictive CSP without breaking WebStorm's dev run.
+      cspNonce: 'composatoastrenderer'
+    },
     build: {
       rollupOptions: {
         input: resolve('src/renderer/index.html')
       }
-    },
-    plugins: [react()]
+    }
   }
 })

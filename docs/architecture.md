@@ -72,7 +72,10 @@ fabricate or patch undocumented `.cptx` internals.
 
 The main process performs filesystem work. The sandboxed renderer displays summaries
 and submits typed requests through the preload bridge. Course paths and content are not
-exposed through Node.js APIs in the renderer.
+exposed through Node.js APIs in the renderer. The renderer is framework-free HTML, CSS,
+and TypeScript; course-controlled values are assigned through DOM `textContent` rather
+than HTML interpolation. The main process selects native Windows window controls and
+Mica only on OS builds that support them, with system-theme and accessibility fallbacks.
 
 ## Export invariants
 

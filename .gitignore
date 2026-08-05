@@ -4,6 +4,8 @@ out/
 dist/
 release/
 coverage/
+playwright-report/
+test-results/
 *.log
 
 # Local conversion output and temporary work

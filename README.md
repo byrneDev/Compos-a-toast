@@ -11,6 +11,11 @@ interactions, and assets into a neutral model that can be exported as:
 The application never launches a course's HTA, ActiveX controls, JavaScript, or
 Flash files during extraction.
 
+The desktop client is Electron end to end: a native Electron main process and secure
+preload bridge with a framework-free HTML, CSS, and TypeScript renderer. On supported
+Windows 11 versions it uses native caption controls and the Mica system backdrop;
+Windows 10 and accessibility modes receive an opaque, system-theme-aware fallback.
+
 > **Project status:** early MVP. Treat generated content as a migration draft and
 > perform visual, interaction, accessibility, and LMS acceptance testing before
 > production use. Native CPTX assembly is represented by a documented job file,
@@ -44,6 +49,8 @@ the source again.
   reference are carried into the slide folder as well.
 - Builds an HTML5 SCORM 1.2 ZIP with an `imsmanifest.xml` at its root, a standalone
   fallback, basic native interactions, navigation, scoring, bookmarking, and resume state.
+- Provides a Windows-oriented desktop interface that follows light, dark, high-contrast,
+  and reduced-transparency preferences without a browser UI framework.
 
 Recovery is evidence-based, not magical. Dynamic runtime behavior, proprietary game
 logic, server dependencies, and some deeply scripted interactions may need manual
@@ -72,6 +79,7 @@ Useful scripts:
 npm.cmd run dev                 # Electron + Vite development mode
 npm.cmd start                   # Build and launch with the development Electron runtime
 npm.cmd test                    # Unit tests
+npm.cmd run test:e2e            # Build and run the Playwright Electron workflow test
 npm.cmd run test:local-courses  # Read-only checks against ignored local samples
 npm.cmd run typecheck           # Main/preload/core and renderer TypeScript checks
 npm.cmd run build               # Production Electron build
