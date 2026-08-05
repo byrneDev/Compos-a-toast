@@ -77,7 +77,7 @@ describe('createDesktopShellConfiguration', () => {
       backgroundMaterial: 'mica',
       titleBarStyle: 'hidden',
       titleBarOverlay: {
-        color: 'transparent',
+        color: '#F3F3F3',
         symbolColor: '#1A1A1A'
       }
     })
@@ -118,6 +118,7 @@ describe('createDesktopShellConfiguration', () => {
     expect(configuration.windowOptions).toMatchObject({
       backgroundColor: '#202020',
       titleBarOverlay: {
+        color: '#202020',
         symbolColor: '#FFFFFF'
       }
     })

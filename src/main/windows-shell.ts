@@ -108,7 +108,10 @@ export function createDesktopShellConfiguration(
   if (usesWindowControlsOverlay) {
     windowOptions.titleBarStyle = 'hidden'
     windowOptions.titleBarOverlay = {
-      color: usesMica ? 'transparent' : colors.background,
+      // An explicit color keeps the native caption-button strip in sync with
+      // dark mode. A transparent overlay can expose a light DWM backing layer
+      // even while the renderer and Mica backdrop are dark.
+      color: colors.background,
       symbolColor: colors.foreground,
       height: TITLE_BAR_HEIGHT
     }
