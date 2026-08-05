@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<project title="Synthetic Migration Course" description="Invented parser fixture" version="1.2.3" windowWidth="960" windowHeight="540" id="SyntheticRes" publicId="synthetic-public-id" theme="../../Themes/synthetic.css" master="master/main.html" windowBackColor="#123456" courseMode="exe" persist="true">
+  <config>
+    <master title="Synthetic master" id="master/main.html" />
+  </config>
+  <structure>
+    <page title="Welcome" id="page/intro.html" />
+    <chapter title="Practice" id="chapter/practice.html">
+      <page title="Shared activity" id="page/shared.html" />
+      <test title="Synthetic Game" id="test/game.html" passScore="80">
+        <section title="Question bank" id="section/bank.html">
+          <page title="Shared activity again" id="page/shared.html" />
+          <page title="Missing page" id="page/not-there.html" />
+        </section>
+      </test>
+    </chapter>
+  </structure>
+</project>

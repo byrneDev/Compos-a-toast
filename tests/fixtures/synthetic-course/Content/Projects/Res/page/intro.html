@@ -1,0 +1,17 @@
+<!-- This is entirely synthetic legacy-shaped markup. Nothing in script is ever executed. -->
+<?xml:namespace prefix = gm />
+<gm:box id="headline" style="DISPLAY: block; LEFT: 12px; TOP: 18px; WIDTH: 300px; HEIGHT: 44px; Z-INDEX: 3; POSITION: absolute">Welcome &amp; learn</gm:box>
+<IMG id="hero" style="LEFT: 30px; TOP: 80px; POSITION: absolute; BACKGROUND-IMAGE: url(Projects/Res/library/pattern.svg)" src="Projects/Res/library/picture.svg" width="120" height="80">
+<IMG id="missing-image" src="Projects/Res/library/missing.png">
+<gm:multichoice id="question-one" style="LEFT: 50px; TOP: 180px; POSITION: absolute" randomize="false">
+  <gm:mcquestion>Which answer is invented for this fixture?</gm:mcquestion>
+  <gm:mcanswer mcindex="1" correct="false">An imported answer</gm:mcanswer>
+  <gm:mcanswer mcindex="2" correct="true">The synthetic answer</gm:mcanswer>
+  <gm:feedback attempts="2">
+    <gm:fbright>That is correct.</gm:fbright>
+    <gm:fbwrong>Try a different answer.</gm:fbwrong>
+    <gm:fbretry>Try again</gm:fbretry>
+    <gm:fbcustom when="second attempt">A custom hint</gm:fbcustom>
+  </gm:feedback>
+</gm:multichoice>
+<SCRIPT>throw new Error('Legacy scripts must never execute while analyzing.')</SCRIPT>

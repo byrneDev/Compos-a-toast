@@ -1,0 +1,69 @@
+{
+  "name": "compos-a-toast",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A desktop migration workbench for extracting legacy Composica courses into editable bundles and HTML5 SCORM 1.2 packages.",
+  "main": "./out/main/index.js",
+  "type": "module",
+  "author": "Compos-a-toast contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "keywords": [
+    "composica",
+    "captivate",
+    "scorm",
+    "elearning",
+    "electron"
+  ],
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build && node scripts/verify-build.mjs",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:local-courses": "vitest run --config vitest.local.config.ts",
+    "package": "npm run build && electron-builder --dir",
+    "package:win": "npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.composatoast.desktop",
+    "productName": "Compos-a-toast",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    }
+  },
+  "dependencies": {
+    "adm-zip": "0.6.0",
+    "fast-xml-parser": "5.10.1",
+    "htmlparser2": "12.0.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "0.5.8",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "5.2.0",
+    "@vitest/coverage-v8": "4.1.10",
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "typescript": "7.0.2",
+    "vite": "7.3.6",
+    "vitest": "4.1.10"
+  }
+}

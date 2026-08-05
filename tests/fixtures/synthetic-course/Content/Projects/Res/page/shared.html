@@ -1,0 +1,16 @@
+<?xml:namespace prefix = gm />
+<gm:fillblank id="planet-question" style="LEFT: 20px; TOP: 20px; WIDTH: 400px; HEIGHT: 120px; POSITION: absolute">
+  <gm:blankquestion>The invented probe visited <gm:blankitem><gm:blankwrite></gm:blankwrite><gm:blankoptions><gm:blankoption correct="true">Mercury</gm:blankoption><gm:blankoption correct="false">Neptune</gm:blankoption></gm:blankoptions></gm:blankitem>.</gm:blankquestion>
+  <gm:feedback><gm:fbright>Correct destination</gm:fbright><gm:fbwrong>Incorrect destination</gm:fbwrong></gm:feedback>
+</gm:fillblank>
+<gm:dragdrop id="sorting-question" style="LEFT: 20px; TOP: 160px; POSITION: absolute">
+  <gm:dragitem ddindex="1">Alpha card</gm:dragitem>
+  <gm:dragitem ddindex="2">Beta card</gm:dragitem>
+  <gm:droparea ddindex="1"></gm:droparea>
+  <gm:droparea ddindex="2"></gm:droparea>
+  <gm:feedback><gm:fbpartial>One card is misplaced.</gm:fbpartial></gm:feedback>
+</gm:dragdrop>
+<gm:hotspots id="detail-popups" style="LEFT: 500px; TOP: 30px; POSITION: absolute">
+  <gm:hotspot hotindex="1" hotevent="click" style="WIDTH: 50px; HEIGHT: 50px; BACKGROUND-IMAGE: url(Projects/Res/library/picture.svg)"></gm:hotspot>
+  <gm:hotpop hotindex="1">Synthetic detail panel</gm:hotpop>
+</gm:hotspots>

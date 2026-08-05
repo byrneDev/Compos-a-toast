@@ -1,0 +1,34 @@
+# Dependencies and generated application output
+node_modules/
+out/
+dist/
+release/
+coverage/
+*.log
+
+# Local conversion output and temporary work
+output/
+exports/
+.compos-a-toast/
+*-migration-bundle/
+*-scorm12*/
+.compos-a-toast-scorm-*/
+.*-migration-bundle.building-*/
+.*-migration-bundle.replaced-*/
+*.cptx
+*.zip
+
+# Local IDE and operating-system state
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# The supplied reference courses are local test material and must never be published
+/Activities/
+/AstroHops/
+/DeepSpace/
+/GameShow/
+/Introduction/
+/MasterPlumber/
+/OfficeErgo/
