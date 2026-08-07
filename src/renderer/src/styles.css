@@ -700,13 +700,17 @@ input:disabled {
   cursor: pointer;
 }
 
-.target-card:hover:not(:disabled) {
+.target-card:hover:not(:disabled):not([aria-disabled="true"]) {
   border-color: var(--stroke-strong);
   background: var(--control-hover);
 }
 
-.target-card:active:not(:disabled) {
+.target-card:active:not(:disabled):not([aria-disabled="true"]) {
   background: var(--control-pressed);
+}
+
+.target-card[aria-disabled="true"] {
+  cursor: default;
 }
 
 .target-card.is-selected {
@@ -794,7 +798,7 @@ input:disabled {
   font-weight: 600;
 }
 
-.target-copy > span:not(.target-kicker, .pending-label) {
+.target-copy > span:not(.target-kicker, .installation-label, .integration-reason, .availability-label) {
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.4;
@@ -817,11 +821,33 @@ input:disabled {
   background: var(--accent);
 }
 
-.pending-label {
+.installation-label {
   margin-top: 5px;
   color: #6c3db5;
   font-size: 10px;
   font-weight: 600;
+}
+
+.target-card[data-captivate-state="eligible"] .installation-label {
+  color: var(--success);
+}
+
+.target-card[data-captivate-state="ineligible"] .installation-label {
+  color: var(--warning);
+}
+
+.integration-reason {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.availability-label {
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .destination-card {

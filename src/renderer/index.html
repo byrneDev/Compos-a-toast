@@ -143,13 +143,25 @@
                 <span class="target-check" aria-hidden="true"></span>
               </button>
 
-              <button class="target-card is-pending" type="button" data-export-target="captivate" aria-pressed="false" disabled>
+              <button
+                class="target-card is-pending"
+                id="captivate-target"
+                type="button"
+                data-export-target="captivate"
+                data-captivate-state="checking"
+                aria-pressed="false"
+                aria-disabled="true"
+                aria-labelledby="captivate-target-title"
+                aria-describedby="captivate-description captivate-status captivate-reason captivate-availability"
+              >
                 <span class="target-icon captivate-icon" aria-hidden="true">Cp</span>
                 <span class="target-copy">
                   <span class="target-kicker">Native editable project</span>
-                  <strong>Adobe Captivate (.cptx)</strong>
-                  <span>Version-pinned Captivate automation will assemble native editable objects.</span>
-                  <span class="pending-label" id="captivate-status">Adapter in development · Checking this computer…</span>
+                  <strong id="captivate-target-title">Adobe Captivate (.cptx)</strong>
+                  <span id="captivate-description">Planned output: native editable objects assembled through a verified Captivate Classic installation.</span>
+                  <span class="installation-label" id="captivate-status" role="status" aria-live="polite" aria-atomic="true">Checking for Adobe Captivate Classic…</span>
+                  <span class="integration-reason" id="captivate-reason" hidden></span>
+                  <span class="availability-label" id="captivate-availability">Native CPTX generation is not enabled in this build.</span>
                 </span>
                 <span class="target-check" aria-hidden="true"></span>
               </button>

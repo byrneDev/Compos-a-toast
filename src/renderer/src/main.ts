@@ -5,6 +5,7 @@ import type {
   ExportResultDto,
   ExportTarget
 } from '../../shared/contracts'
+import { presentCaptivateStatus } from './captivate-status'
 import './styles.css'
 
 type BusyState = 'idle' | 'selecting-source' | 'selecting-output' | 'analyzing' | 'exporting'
@@ -79,7 +80,10 @@ const elements = {
   rebuildHint: requiredElement<HTMLParagraphElement>('rebuild-hint'),
   rebuildNavigation: requiredElement<HTMLAnchorElement>('rebuild-navigation'),
   targetList: requiredElement<HTMLDivElement>('target-list'),
+  captivateCard: requiredElement<HTMLButtonElement>('captivate-target'),
   captivateStatus: requiredElement<HTMLSpanElement>('captivate-status'),
+  captivateReason: requiredElement<HTMLSpanElement>('captivate-reason'),
+  captivateAvailability: requiredElement<HTMLSpanElement>('captivate-availability'),
   errorMessage: requiredElement<HTMLElement>('error-message'),
   errorHeading: requiredElement<HTMLHeadingElement>('error-heading'),
   errorText: requiredElement<HTMLParagraphElement>('error-text'),
@@ -168,16 +172,18 @@ function renderEnvironment(): void {
             : 'Desktop app'
     setText(elements.platformLabel, platformName)
 
-    const detection = state.environment.captivate
-    setText(
-      elements.captivateStatus,
-      `Adapter in development · ${detection.detected ? 'Captivate detected' : 'Captivate not detected'}`
-    )
-    elements.captivateStatus.title = detection.path ?? detection.reason ?? ''
-  } else if (state.environmentError) {
-    setText(elements.captivateStatus, 'Adapter in development · Detection unavailable')
-    elements.captivateStatus.title = ''
   }
+
+  const captivate = presentCaptivateStatus(
+    state.environment?.captivate ?? null,
+    state.environmentError
+  )
+  setText(elements.captivateStatus, captivate.installationText)
+  setText(elements.captivateReason, captivate.reasonText)
+  setText(elements.captivateAvailability, captivate.availabilityText)
+  elements.captivateReason.hidden = !captivate.reasonText
+  elements.captivateStatus.title = captivate.title
+  elements.captivateCard.dataset.captivateState = captivate.installationState
 }
 
 function renderSummary(): void {
@@ -230,7 +236,14 @@ function renderTargets(): void {
     if (!target) continue
     const isSupported = target !== 'captivate'
     const selected = state.selectedTargets.has(target)
-    button.disabled = !targetsEnabled || !isSupported
+    if (isSupported) {
+      button.disabled = !targetsEnabled
+      button.removeAttribute('aria-disabled')
+    } else {
+      // Keep unavailable targets keyboard-focusable so their readiness details can be read.
+      button.disabled = false
+      button.setAttribute('aria-disabled', 'true')
+    }
     button.classList.toggle('is-selected', selected)
     button.setAttribute('aria-pressed', String(selected))
     const check = button.querySelector<HTMLElement>('.target-check')

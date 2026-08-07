@@ -167,7 +167,7 @@ export async function exportCourse(request: ExportRequestDto): Promise<ExportRes
       path: bundleResult.path,
       message:
         captivate.detected && captivate.adapterEligible
-          ? `Adobe Captivate Classic ${captivate.version ?? ''} is installed and verified, but the authoring adapter is still under development. A Captivate assembly job was written to the migration bundle.`
+          ? `Adobe Captivate Classic ${captivate.version ?? ''} is installed and verified, but native CPTX generation is not enabled in this build. A Captivate assembly job was written to the migration bundle.`
           : `${captivate.reason ?? 'Captivate is unavailable.'} A Captivate assembly job was written to the migration bundle.`
     })
   }

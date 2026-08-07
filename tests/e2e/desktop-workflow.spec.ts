@@ -61,12 +61,47 @@ test('analyzes a course and exports both supported formats', async () => {
       requireType: 'undefined'
     })
 
+    await electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('app:environment')
+      ipcMain.handle('app:environment', () => ({
+        appVersion: '0.1.0',
+        platform: 'win32',
+        captivate: {
+          detected: true,
+          path: 'C:\\Program Files\\Adobe\\Adobe Captivate Classic x64\\AdobeCaptivateClassic.exe',
+          product: 'classic',
+          version: '11.8.4.21',
+          productName: 'Adobe Captivate Classic',
+          signatureVerified: true,
+          versionSupported: true,
+          adapterEligible: true
+        }
+      }))
+    })
+    await page.reload()
+
+    const captivateTarget = page.getByRole('button', { name: /Adobe Captivate \(\.cptx\)/ })
+    const captivateStatus = page.locator('#captivate-status')
+    await expect(captivateTarget).toBeDisabled()
+    await expect(captivateTarget).toHaveAttribute('aria-pressed', 'false')
+    await expect(captivateTarget).toHaveAttribute('aria-disabled', 'true')
+    await expect(captivateStatus).not.toContainText('Adapter in development')
+    await expect(captivateStatus).toHaveText(
+      'Adobe Captivate Classic 11.8.4.21 installed and verified'
+    )
+    await expect(page.locator('#captivate-availability')).toHaveText(
+      'Native CPTX generation is not enabled in this build.'
+    )
+    await expect(captivateTarget).toHaveAttribute('data-captivate-state', 'eligible')
+
     await page.getByRole('textbox', { name: 'Published course folder' }).fill(syntheticCourse)
     await page.getByRole('button', { name: 'Analyze' }).click()
 
     await expect(page.getByText('Recognized', { exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Synthetic Migration Course' })).toBeVisible()
     await expect(page.locator('.stat').filter({ hasText: 'Slides' })).toContainText('4')
+    await expect(captivateTarget).toBeDisabled()
+    await expect(captivateTarget).not.toHaveClass(/is-selected/)
 
     const scormTarget = page.getByRole('button', { name: /HTML5 SCORM 1\.2/ })
     await scormTarget.click()
@@ -83,6 +118,7 @@ test('analyzes a course and exports both supported formats', async () => {
     const exportedEntries = await readdir(outputRoot)
     expect(exportedEntries.some((entry) => entry.endsWith('-migration-bundle'))).toBe(true)
     expect(exportedEntries.some((entry) => entry.endsWith('-scorm12.zip'))).toBe(true)
+    expect(exportedEntries.some((entry) => entry.endsWith('.cptx'))).toBe(false)
     expect(pageErrors).toEqual([])
   } finally {
     await electronApp?.close()
