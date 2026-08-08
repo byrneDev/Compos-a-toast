@@ -92,9 +92,14 @@ npm.cmd run typecheck           # Main/preload/core and renderer TypeScript chec
 npm.cmd run build               # Production Electron build
 npm.cmd run package             # Signed unpacked app; signing credentials required
 npm.cmd run package:unsigned    # Unsigned unpacked output for isolated inspection
-npm.cmd run package:win         # Signed Windows installer; signing credentials required
-npm.cmd run package:win:unsigned # Unsigned installer for isolated build inspection only
+npm.cmd run package:win         # Signed Windows x64 installer; signing credentials required
+npm.cmd run package:win:unsigned # Unsigned x64 installer for isolated build inspection only
 ```
+
+Windows packaging emits one standard assisted NSIS installer named
+`release\Compos-a-toast-Setup-<version>-x64.exe`; it does not emit a portable
+executable. The installer offers current-user or all-users scope and a destination
+folder, and installs branded desktop and Start menu shortcuts.
 
 For a saved WebStorm run configuration, choose **npm**, select this `package.json`,
 and use the `dev`, `test`, or `build` script. No JetBrains-specific project files are
@@ -156,6 +161,10 @@ certificate from a trusted provider (or an organization certificate explicitly t
 by its App Control policy), supplied through electron-builder's `WIN_CSC_LINK` and
 `WIN_CSC_KEY_PASSWORD` environment variables. Certificates and passwords must not be
 stored in this repository. See [Windows signing](docs/windows-signing.md).
+
+`package:win:unsigned` is only for isolated installer inspection. Its installer and
+installed executable have no trusted publisher and may be blocked by Smart App Control
+or organization-managed policy.
 
 ## Repository data policy
 

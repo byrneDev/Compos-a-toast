@@ -31,10 +31,11 @@
     "test:captivate-live": "set COMPOS_A_TOAST_RUN_CAPTIVATE_LIVE=1&& vitest run --disableConsoleIntercept --config vitest.captivate.config.ts",
     "clean:release": "node scripts/clean-release.mjs",
     "verify:package": "node scripts/verify-package.mjs",
+    "verify:windows-installer": "node scripts/verify-windows-installer.mjs",
     "package": "npm run clean:release && npm run build && electron-builder --dir -c.forceCodeSigning=true && npm run verify:package",
     "package:unsigned": "npm run clean:release && npm run build && electron-builder --dir && npm run verify:package",
-    "package:win": "npm run clean:release && npm run build && electron-builder --win -c.forceCodeSigning=true && npm run verify:package",
-    "package:win:unsigned": "npm run clean:release && npm run build && electron-builder --win && npm run verify:package"
+    "package:win": "npm run clean:release && npm run build && electron-builder --win nsis --x64 -c.forceCodeSigning=true && npm run verify:package && npm run verify:windows-installer",
+    "package:win:unsigned": "npm run clean:release && npm run build && electron-builder --win nsis --x64 && npm run verify:package && npm run verify:windows-installer"
   },
   "build": {
     "appId": "com.composatoast.desktop",
@@ -55,9 +56,31 @@
     "win": {
       "icon": "build/icon.ico",
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "selectPerMachineByDefault": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "buildUniversalInstaller": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Compos-a-toast",
+      "menuCategory": false,
+      "runAfterFinish": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "license": "LICENSE",
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
+      "uninstallDisplayName": "${productName} ${version} (64-bit)"
     }
   },
   "dependencies": {

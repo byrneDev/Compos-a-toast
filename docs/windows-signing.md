@@ -43,23 +43,29 @@ npm.cmd run package:win
 ```
 
 The `package` and `package:win` commands enable electron-builder's `forceCodeSigning`
-option and fail if they cannot sign. `package:win` produces the configured installer
-and portable targets only after the application executable has a signing identity.
+option and fail if they cannot sign. `package:win` produces one assisted NSIS installer
+for 64-bit Windows only after the application executable has a signing identity. The
+artifact is named `release\Compos-a-toast-Setup-<version>-x64.exe`; no portable target
+is produced. The installer supports current-user or all-users scope and destination
+selection, and creates branded desktop and Start menu shortcuts.
 
 Verify the result before distributing it:
 
 ```powershell
 Get-AuthenticodeSignature '.\release\win-unpacked\Compos-a-toast.exe' |
   Format-List Status, StatusMessage, SignerCertificate
+Get-ChildItem '.\release\Compos-a-toast-Setup-*-x64.exe' |
+  Get-AuthenticodeSignature |
+  Format-List Status, StatusMessage, SignerCertificate
 ```
 
-`Status` must be `Valid`, and the signer must be the expected publisher. Also test every
-installer, executable, uninstaller, and update path on a Smart App Control or equivalent
-App Control test machine.
+Both `Status` values must be `Valid`, and each signer must be the expected publisher.
+Also test the installer, installed executable, uninstaller, shortcuts, and update path
+on a Smart App Control or equivalent App Control test machine.
 
 `package:unsigned` and `package:win:unsigned` remain available only for isolated
-packaging inspection. Their output should be expected to fail on machines that require
-trusted signatures.
+packaging inspection. Their output has no trusted publisher and should be expected to
+be blocked on machines that require trusted signatures.
 
 ## References
 
