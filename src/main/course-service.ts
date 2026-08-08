@@ -2,6 +2,12 @@ import { mkdir, realpath } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { analyzeComposicaCourse } from '../core/composica'
 import { exportMigrationBundle } from '../core/bundle'
+import {
+  defaultCaptivateSeedCandidates,
+  exportCaptivateEditableDraft,
+  probeCaptivateAdapter,
+  type CaptivateAdapterRuntime
+} from '../core/captivate/adapter'
 import { detectCaptivate } from '../core/captivate/detect'
 import { exportScorm12 } from '../core/scorm'
 import type { CourseModel, ExportedArtifact } from '../core/model'
@@ -12,6 +18,19 @@ import type {
   ExportRequestDto,
   ExportResultDto
 } from '../shared/contracts'
+
+export interface CourseServiceRuntime {
+  captivate: CaptivateAdapterRuntime
+}
+
+function defaultCourseServiceRuntime(): CourseServiceRuntime {
+  return {
+    captivate: {
+      driverPath: resolve('src/core/captivate/classic-11.8.4-driver.ps1'),
+      seedCptxPaths: defaultCaptivateSeedCandidates()
+    }
+  }
+}
 
 function countQuestions(model: CourseModel): number {
   const questionTypes = new Set(['multiple-choice', 'fill-blank', 'drag-drop'])
@@ -96,7 +115,10 @@ function createdArtifact(
   return { target, status: 'created', path: result.path, message }
 }
 
-export async function exportCourse(request: ExportRequestDto): Promise<ExportResultDto> {
+export async function exportCourse(
+  request: ExportRequestDto,
+  runtime: CourseServiceRuntime = defaultCourseServiceRuntime()
+): Promise<ExportResultDto> {
   if (request.targets.length === 0) {
     throw new Error('Choose at least one export target.')
   }
@@ -120,6 +142,7 @@ export async function exportCourse(request: ExportRequestDto): Promise<ExportRes
   const diagnostics: DiagnosticDto[] = [...model.diagnostics]
   const artifacts: ExportArtifactDto[] = []
   let bundleResult: ExportedArtifact | undefined
+  let bundleError: unknown
 
   if (request.targets.includes('migration-bundle')) {
     try {
@@ -133,6 +156,7 @@ export async function exportCourse(request: ExportRequestDto): Promise<ExportRes
         )
       )
     } catch (error) {
+      bundleError = error
       artifacts.push(failedArtifact('migration-bundle', error))
     }
   }
@@ -152,24 +176,59 @@ export async function exportCourse(request: ExportRequestDto): Promise<ExportRes
   if (request.targets.includes('captivate')) {
     const captivate = await detectCaptivate()
     if (!bundleResult) {
-      try {
-        bundleResult = await exportMigrationBundle(model, outputPath)
-        diagnostics.push(...bundleResult.diagnostics)
-      } catch (error) {
-        artifacts.push(failedArtifact('captivate', error))
+      if (!bundleError) {
+        try {
+          bundleResult = await exportMigrationBundle(model, outputPath)
+          diagnostics.push(...bundleResult.diagnostics)
+          artifacts.push(
+            createdArtifact(
+              'migration-bundle',
+              bundleResult,
+              'Created the supporting editable migration bundle required for Captivate review.'
+            )
+          )
+        } catch (error) {
+          bundleError = error
+        }
+      }
+      if (!bundleResult) {
+        artifacts.push(
+          failedArtifact(
+            'captivate',
+            bundleError ?? 'The supporting migration bundle could not be created.'
+          )
+        )
         return { artifacts, diagnostics: deduplicateDiagnostics(diagnostics) }
       }
     }
 
-    artifacts.push({
-      target: 'captivate',
-      status: 'skipped',
-      path: bundleResult.path,
-      message:
-        captivate.detected && captivate.adapterEligible
-          ? `Adobe Captivate Classic ${captivate.version ?? ''} is installed and verified, but native CPTX generation is not enabled in this build. A Captivate assembly job was written to the migration bundle.`
-          : `${captivate.reason ?? 'Captivate is unavailable.'} A Captivate assembly job was written to the migration bundle.`
-    })
+    try {
+      // Re-probe the executable, build, driver, and seed for every request. Renderer state is
+      // informative only and never authorizes an export by itself.
+      const adapterProbe = await probeCaptivateAdapter(captivate, runtime.captivate)
+      if (adapterProbe.capability.state !== 'ready') {
+        throw new Error(adapterProbe.capability.reason)
+      }
+
+      const result = await exportCaptivateEditableDraft(
+        model,
+        outputPath,
+        bundleResult.path,
+        captivate,
+        adapterProbe,
+        runtime.captivate
+      )
+      diagnostics.push(...result.diagnostics)
+      artifacts.push(
+        createdArtifact(
+          'captivate',
+          result,
+          `Created an editable Captivate Classic ${captivate.version ?? ''} text draft with native slides and titles. Use the migration bundle to rebuild assets, interactions, and detailed layout.`
+        )
+      )
+    } catch (error) {
+      artifacts.push(failedArtifact('captivate', error))
+    }
   }
 
   return { artifacts, diagnostics: deduplicateDiagnostics(diagnostics) }

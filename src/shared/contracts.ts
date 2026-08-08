@@ -3,7 +3,9 @@ export const IPC_CHANNELS = {
   selectOutput: 'output:select',
   analyzeCourse: 'course:analyze',
   exportCourse: 'course:export',
-  environment: 'app:environment'
+  environment: 'app:environment',
+  captivateProgress: 'app:captivate-progress',
+  quitDeferred: 'app:quit-deferred'
 } as const
 
 export type ExportTarget = 'migration-bundle' | 'scorm12' | 'captivate'
@@ -21,6 +23,30 @@ export interface CaptivateDetectionDto {
   adapterEligible: boolean
   reason?: string
 }
+
+export type CaptivateNativeObjectCapability =
+  | 'slide'
+  | 'text'
+  | 'image'
+  | 'interaction'
+
+export interface CaptivateAdapterScopeDto {
+  nativeObjects: CaptivateNativeObjectCapability[]
+  unsupportedBehavior: 'migration-bundle-review'
+}
+
+export type CaptivateAdapterCapabilityDto =
+  | {
+      state: 'unavailable' | 'verification-required' | 'blocked'
+      reason: string
+    }
+  | {
+      state: 'ready'
+      adapterId: string
+      captivateBuild: string
+      verifiedAt: string
+      scope: CaptivateAdapterScopeDto
+    }
 
 export interface DiagnosticDto {
   severity: 'info' | 'warning' | 'error'
@@ -45,6 +71,7 @@ export interface EnvironmentDto {
   appVersion: string
   platform: string
   captivate: CaptivateDetectionDto
+  captivateAdapter: CaptivateAdapterCapabilityDto
 }
 
 export interface ExportRequestDto {
@@ -65,10 +92,20 @@ export interface ExportResultDto {
   diagnostics: DiagnosticDto[]
 }
 
+export interface CaptivateProgressDto {
+  stage: string
+  code?: string
+  message: string
+  requiresUserAction: boolean
+  timestamp?: string
+}
+
 export interface DesktopApi {
   selectCourse(): Promise<string | null>
   selectOutput(): Promise<string | null>
   analyzeCourse(sourcePath: string): Promise<CourseSummaryDto>
   exportCourse(request: ExportRequestDto): Promise<ExportResultDto>
   getEnvironment(): Promise<EnvironmentDto>
+  onCaptivateProgress(listener: (progress: CaptivateProgressDto) => void): () => void
+  onQuitDeferred(listener: (message: string) => void): () => void
 }

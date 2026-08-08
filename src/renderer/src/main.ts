@@ -1,11 +1,15 @@
 import type {
+  CaptivateProgressDto,
   CourseSummaryDto,
   DiagnosticDto,
   EnvironmentDto,
   ExportResultDto,
   ExportTarget
 } from '../../shared/contracts'
-import { presentCaptivateStatus } from './captivate-status'
+import {
+  presentCaptivateStatus,
+  type CaptivateStatusPresentation
+} from './captivate-status'
 import './styles.css'
 
 type BusyState = 'idle' | 'selecting-source' | 'selecting-output' | 'analyzing' | 'exporting'
@@ -20,6 +24,7 @@ interface RendererState {
   selectedTargets: Set<ExportTarget>
   error: string | null
   result: ExportResultDto | null
+  captivateProgress: CaptivateProgressDto | null
 }
 
 const targetDetails: Record<ExportTarget, { title: string }> = {
@@ -28,7 +33,7 @@ const targetDetails: Record<ExportTarget, { title: string }> = {
   captivate: { title: 'Adobe Captivate (.cptx)' }
 }
 
-const supportedTargets: ExportTarget[] = ['migration-bundle', 'scorm12']
+const supportedTargets: ExportTarget[] = ['migration-bundle', 'scorm12', 'captivate']
 const state: RendererState = {
   environment: null,
   environmentError: false,
@@ -38,7 +43,8 @@ const state: RendererState = {
   busy: 'idle',
   selectedTargets: new Set<ExportTarget>(['migration-bundle']),
   error: null,
-  result: null
+  result: null,
+  captivateProgress: null
 }
 
 let operationSequence = 0
@@ -84,11 +90,18 @@ const elements = {
   captivateStatus: requiredElement<HTMLSpanElement>('captivate-status'),
   captivateReason: requiredElement<HTMLSpanElement>('captivate-reason'),
   captivateAvailability: requiredElement<HTMLSpanElement>('captivate-availability'),
+  captivateProgressMessage: requiredElement<HTMLElement>('captivate-progress-message'),
+  captivateProgressHeading: requiredElement<HTMLHeadingElement>('captivate-progress-heading'),
+  captivateProgressText: requiredElement<HTMLParagraphElement>('captivate-progress-text'),
   errorMessage: requiredElement<HTMLElement>('error-message'),
   errorHeading: requiredElement<HTMLHeadingElement>('error-heading'),
   errorText: requiredElement<HTMLParagraphElement>('error-text'),
   resultSection: requiredElement<HTMLElement>('results-section'),
+  resultTitle: requiredElement<HTMLDivElement>('results-title'),
+  resultIcon: requiredElement<HTMLSpanElement>('results-icon'),
+  resultKicker: requiredElement<HTMLParagraphElement>('results-kicker'),
   resultHeading: requiredElement<HTMLHeadingElement>('results-heading'),
+  resultSummary: requiredElement<HTMLParagraphElement>('results-summary'),
   resultsNavigation: requiredElement<HTMLAnchorElement>('results-navigation'),
   artifactList: requiredElement<HTMLDivElement>('artifact-list'),
   exportDiagnostics: requiredElement<HTMLDetailsElement>('export-diagnostics'),
@@ -155,11 +168,19 @@ function getTarget(button: HTMLButtonElement): ExportTarget | null {
     : null
 }
 
+function getCaptivatePresentation(): CaptivateStatusPresentation {
+  return presentCaptivateStatus(
+    state.environment?.captivate ?? null,
+    state.environment?.captivateAdapter ?? null,
+    state.environmentError
+  )
+}
+
 function availableTargetCount(): number {
   return supportedTargets.filter((target) => state.selectedTargets.has(target)).length
 }
 
-function renderEnvironment(): void {
+function renderEnvironment(captivate: CaptivateStatusPresentation): void {
   if (state.environment) {
     setText(elements.appVersion, `Version ${state.environment.appVersion}`)
     const platformName =
@@ -174,16 +195,13 @@ function renderEnvironment(): void {
 
   }
 
-  const captivate = presentCaptivateStatus(
-    state.environment?.captivate ?? null,
-    state.environmentError
-  )
   setText(elements.captivateStatus, captivate.installationText)
   setText(elements.captivateReason, captivate.reasonText)
   setText(elements.captivateAvailability, captivate.availabilityText)
   elements.captivateReason.hidden = !captivate.reasonText
   elements.captivateStatus.title = captivate.title
   elements.captivateCard.dataset.captivateState = captivate.installationState
+  elements.captivateCard.classList.toggle('is-pending', !captivate.selectable)
 }
 
 function renderSummary(): void {
@@ -227,14 +245,14 @@ function renderSummary(): void {
   )
 }
 
-function renderTargets(): void {
+function renderTargets(captivate: CaptivateStatusPresentation): void {
   const targetsEnabled = Boolean(state.summary) && state.busy === 'idle'
   elements.targetList.setAttribute('aria-disabled', String(!targetsEnabled))
 
   for (const button of targetButtons) {
     const target = getTarget(button)
     if (!target) continue
-    const isSupported = target !== 'captivate'
+    const isSupported = target !== 'captivate' || captivate.selectable
     const selected = state.selectedTargets.has(target)
     if (isSupported) {
       button.disabled = !targetsEnabled
@@ -292,6 +310,35 @@ function renderResult(): void {
     return
   }
 
+  const createdCount = result.artifacts.filter((artifact) => artifact.status === 'created').length
+  const failedCount = result.artifacts.filter((artifact) => artifact.status === 'failed').length
+  const skippedCount = result.artifacts.filter((artifact) => artifact.status === 'skipped').length
+  const noFilesCreated = createdCount === 0
+  const hasIssues = failedCount > 0 || skippedCount > 0
+  elements.resultTitle.classList.toggle('success-title', !hasIssues)
+  elements.resultTitle.classList.toggle('partial-title', hasIssues && !noFilesCreated)
+  elements.resultTitle.classList.toggle('failure-title', hasIssues && noFilesCreated)
+  setText(elements.resultIcon, hasIssues ? (noFilesCreated ? '!' : '⚠') : '✓')
+  setText(
+    elements.resultKicker,
+    hasIssues ? (noFilesCreated ? 'Failed' : 'Finished with issues') : 'Finished'
+  )
+  setText(
+    elements.resultHeading,
+    hasIssues
+      ? noFilesCreated
+        ? 'Conversion failed.'
+        : 'Conversion finished with issues.'
+      : 'Conversion finished.'
+  )
+  setText(
+    elements.resultSummary,
+    hasIssues
+      ? noFilesCreated
+        ? 'No requested files were created. Review the failures below.'
+        : `${createdCount} ${createdCount === 1 ? 'file was' : 'files were'} created; review the remaining result${failedCount + skippedCount === 1 ? '' : 's'} below.`
+      : 'Your new files are ready at the locations below.'
+  )
   elements.artifactList.replaceChildren(...result.artifacts.map(createArtifact))
   renderDiagnostics(
     result.diagnostics,
@@ -301,7 +348,30 @@ function renderResult(): void {
   )
 }
 
+function renderCaptivateProgress(): void {
+  const progress = state.busy === 'exporting' ? state.captivateProgress : null
+  elements.captivateProgressMessage.hidden = !progress
+  elements.captivateProgressMessage.classList.toggle(
+    'is-action-needed',
+    progress?.requiresUserAction === true
+  )
+  elements.captivateProgressMessage.setAttribute(
+    'aria-live',
+    progress?.requiresUserAction ? 'assertive' : 'polite'
+  )
+  setText(
+    elements.captivateProgressHeading,
+    progress?.requiresUserAction
+      ? 'Action needed in Adobe Captivate'
+      : 'Adobe Captivate is working'
+  )
+  setText(elements.captivateProgressText, progress?.message ?? '')
+}
+
 function render(): void {
+  const captivate = getCaptivatePresentation()
+  if (!captivate.selectable) state.selectedTargets.delete('captivate')
+
   const isIdle = state.busy === 'idle'
   const hasSummary = Boolean(state.summary)
   const canExport =
@@ -326,16 +396,19 @@ function render(): void {
     'selecting-source': 'Choosing course…',
     'selecting-output': 'Choosing destination…',
     analyzing: 'Inspecting course…',
-    exporting: 'Building outputs…'
+    exporting: state.captivateProgress?.requiresUserAction
+      ? 'Action needed in Captivate'
+      : 'Building outputs…'
   }
   setText(elements.titlebarStatus, statusText[state.busy])
 
   elements.errorMessage.hidden = !state.error
   setText(elements.errorText, state.error ?? '')
 
-  renderEnvironment()
+  renderEnvironment(captivate)
   renderSummary()
-  renderTargets()
+  renderTargets(captivate)
+  renderCaptivateProgress()
   renderResult()
 }
 
@@ -343,6 +416,7 @@ function beginOperation(busy: Exclude<BusyState, 'idle'>): number {
   operationSequence += 1
   state.busy = busy
   state.error = null
+  if (busy === 'exporting') state.captivateProgress = null
   render()
   return operationSequence
 }
@@ -350,6 +424,7 @@ function beginOperation(busy: Exclude<BusyState, 'idle'>): number {
 function finishOperation(token: number): boolean {
   if (token !== operationSequence) return false
   state.busy = 'idle'
+  state.captivateProgress = null
   render()
   return true
 }
@@ -430,7 +505,13 @@ async function chooseOutput(): Promise<void> {
 }
 
 function toggleTarget(target: ExportTarget): void {
-  if (state.busy !== 'idle' || !state.summary || target === 'captivate') return
+  if (
+    state.busy !== 'idle' ||
+    !state.summary ||
+    (target === 'captivate' && !getCaptivatePresentation().selectable)
+  ) {
+    return
+  }
   if (state.selectedTargets.has(target)) state.selectedTargets.delete(target)
   else state.selectedTargets.add(target)
   clearResult()
@@ -439,11 +520,14 @@ function toggleTarget(target: ExportTarget): void {
 
 async function runExport(): Promise<void> {
   const outputPath = state.outputPath.trim()
+  const captivate = getCaptivatePresentation()
+  if (!captivate.selectable) state.selectedTargets.delete('captivate')
+  const targets = supportedTargets.filter((target) => state.selectedTargets.has(target))
   if (
     state.busy !== 'idle' ||
     !state.summary ||
     !outputPath ||
-    availableTargetCount() === 0
+    targets.length === 0
   ) {
     return
   }
@@ -456,7 +540,7 @@ async function runExport(): Promise<void> {
     const result = await window.composAToast.exportCourse({
       sourcePath: state.summary.sourcePath,
       outputPath,
-      targets: supportedTargets.filter((target) => state.selectedTargets.has(target))
+      targets
     })
     if (token !== operationSequence) return
     state.result = result
@@ -514,6 +598,18 @@ for (const navigation of [elements.rebuildNavigation, elements.resultsNavigation
     if (navigation.getAttribute('aria-disabled') === 'true') event.preventDefault()
   })
 }
+
+const removeQuitDeferredListener = window.composAToast.onQuitDeferred((message) => {
+  state.error = message
+  render()
+})
+const removeCaptivateProgressListener = window.composAToast.onCaptivateProgress((progress) => {
+  if (state.busy !== 'exporting') return
+  state.captivateProgress = progress
+  render()
+})
+window.addEventListener('beforeunload', removeQuitDeferredListener, { once: true })
+window.addEventListener('beforeunload', removeCaptivateProgressListener, { once: true })
 
 render()
 

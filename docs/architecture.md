@@ -22,6 +22,7 @@ flowchart TB
     M["Neutral CourseModel"]
     B["Bundle exporter"]
     S["SCORM 1.2 exporter"]
+    C["Captivate Classic adapter"]
   end
 
   subgraph Renderer["Sandboxed renderer"]
@@ -34,6 +35,7 @@ flowchart TB
   J -. "inventoried, never executed" .-> X
   X --> M --> B
   M --> S
+  M --> C
   U <-- "narrow typed IPC" --> Main
 ```
 
@@ -66,9 +68,17 @@ browser without an LMS during testing.
 
 Detects the exact Captivate Classic product/build and verifies its Adobe signature. The
 open-smoke layer makes a hash-verified disposable CPTX copy and launches only that copy
-through the verified executable. A real adapter must drive a supported Captivate
-installation to create native objects. It must not fabricate or patch undocumented
-`.cptx` internals.
+through the verified executable. The first authoring driver is SHA-256-pinned to Classic
+`11.8.4.21`, a qualified one-slide seed, and the live-qualified 150% primary-display
+profile. It creates native slides and editable title
+text through asserted Windows UI state, saves to a new file, closes, reopens, and checks
+the exported XML before returning an attestation. Captivate's transient native menus and
+dialogs are revalidated by stable geometry, labels, row positions, classes, and control
+IDs; dynamic leaf command IDs are not trusted. Physical cursor points are hit-tested
+against the expected exact window before input. The TypeScript adapter independently
+checks the resulting ZIP structure, size, and SHA-256, then uses an atomic no-replace hard
+link to publish the final output. No code fabricates or patches undocumented `.cptx`
+internals.
 
 ### `src/main`, `src/preload`, and `src/renderer`
 

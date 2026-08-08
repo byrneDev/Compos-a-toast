@@ -158,10 +158,10 @@
                 <span class="target-copy">
                   <span class="target-kicker">Native editable project</span>
                   <strong id="captivate-target-title">Adobe Captivate (.cptx)</strong>
-                  <span id="captivate-description">Planned output: native editable objects assembled through a verified Captivate Classic installation.</span>
+                  <span id="captivate-description">Editable text draft beta: native slides and title text; assets, interactions, layout, and remaining text stay in the migration bundle for review.</span>
                   <span class="installation-label" id="captivate-status" role="status" aria-live="polite" aria-atomic="true">Checking for Adobe Captivate Classic…</span>
                   <span class="integration-reason" id="captivate-reason" hidden></span>
-                  <span class="availability-label" id="captivate-availability">Native CPTX generation is not enabled in this build.</span>
+                  <span class="availability-label" id="captivate-availability">Checking native CPTX adapter readiness&hellip;</span>
                 </span>
                 <span class="target-check" aria-hidden="true"></span>
               </button>
@@ -192,6 +192,21 @@
                 <span class="button-busy-label" hidden><span class="progress-ring" aria-hidden="true"></span>Converting…</span>
               </button>
             </div>
+
+            <section
+              class="message-card captivate-progress-message"
+              id="captivate-progress-message"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              hidden
+            >
+              <span class="message-icon" aria-hidden="true">Cp</span>
+              <div>
+                <h2 id="captivate-progress-heading">Captivate is working</h2>
+                <p id="captivate-progress-text"></p>
+              </div>
+            </section>
           </section>
 
           <section class="message-card error-message" id="error-message" role="alert" hidden>
@@ -203,12 +218,12 @@
           </section>
 
           <section class="settings-section result-section" id="results-section" aria-labelledby="results-heading" hidden>
-            <div class="section-title success-title">
-              <span class="section-number" aria-hidden="true">✓</span>
+            <div class="section-title success-title" id="results-title">
+              <span class="section-number" id="results-icon" aria-hidden="true">✓</span>
               <div>
-                <p class="page-kicker">Finished</p>
+                <p class="page-kicker" id="results-kicker">Finished</p>
                 <h2 id="results-heading" tabindex="-1">Conversion finished.</h2>
-                <p>Your new files are ready at the locations below.</p>
+                <p id="results-summary">Your new files are ready at the locations below.</p>
               </div>
             </div>
             <div class="artifact-list" id="artifact-list"></div>

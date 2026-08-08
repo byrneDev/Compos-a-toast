@@ -4,7 +4,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
-    exclude: ['tests/local-courses.integration.test.ts'],
+    exclude: [
+      'tests/local-courses.integration.test.ts',
+      'tests/captivate-live.integration.test.ts'
+    ],
     coverage: {
       reporter: ['text', 'html']
     }

@@ -2,7 +2,7 @@
   "name": "compos-a-toast",
   "version": "0.1.0",
   "private": true,
-  "description": "A desktop migration workbench for extracting legacy Composica courses into editable bundles and HTML5 SCORM 1.2 packages.",
+  "description": "A desktop migration workbench for extracting legacy Composica courses into editable bundles, HTML5 SCORM 1.2 packages, and editable-text Captivate drafts.",
   "main": "./out/main/index.js",
   "type": "module",
   "author": "Compos-a-toast contributors",
@@ -28,10 +28,13 @@
     "test:watch": "vitest",
     "test:e2e": "npm run build && playwright test",
     "test:local-courses": "vitest run --config vitest.local.config.ts",
-    "package": "npm run build && electron-builder --dir -c.forceCodeSigning=true",
-    "package:unsigned": "npm run build && electron-builder --dir",
-    "package:win": "npm run build && electron-builder --win -c.forceCodeSigning=true",
-    "package:win:unsigned": "npm run build && electron-builder --win"
+    "test:captivate-live": "set COMPOS_A_TOAST_RUN_CAPTIVATE_LIVE=1&& vitest run --disableConsoleIntercept --config vitest.captivate.config.ts",
+    "clean:release": "node scripts/clean-release.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
+    "package": "npm run clean:release && npm run build && electron-builder --dir -c.forceCodeSigning=true && npm run verify:package",
+    "package:unsigned": "npm run clean:release && npm run build && electron-builder --dir && npm run verify:package",
+    "package:win": "npm run clean:release && npm run build && electron-builder --win -c.forceCodeSigning=true && npm run verify:package",
+    "package:win:unsigned": "npm run clean:release && npm run build && electron-builder --win && npm run verify:package"
   },
   "build": {
     "appId": "com.composatoast.desktop",
@@ -42,6 +45,12 @@
     "files": [
       "out/**/*",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "src/core/captivate/classic-11.8.4-driver.ps1",
+        "to": "captivate/classic-11.8.4-driver.ps1"
+      }
     ],
     "win": {
       "icon": "build/icon.ico",
@@ -57,6 +66,7 @@
     "htmlparser2": "12.0.0"
   },
   "devDependencies": {
+    "@electron/asar": "3.4.1",
     "@playwright/test": "1.62.1",
     "@types/adm-zip": "0.5.8",
     "@types/node": "26.1.2",

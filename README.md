@@ -6,7 +6,7 @@ interactions, and assets into a neutral model that can be exported as:
 
 - an editable, per-slide migration bundle for reconstruction and Captivate assembly;
 - an HTML5 single-SCO SCORM 1.2 package;
-- eventually, a native editable `.cptx` through a version-pinned Adobe Captivate adapter.
+- a native editable-text `.cptx` draft through a version-pinned Adobe Captivate Classic adapter.
 
 The application never launches a course's HTA, ActiveX controls, JavaScript, or
 Flash files during extraction.
@@ -18,8 +18,10 @@ Windows 10 and accessibility modes receive an opaque, system-theme-aware fallbac
 
 > **Project status:** early MVP. Treat generated content as a migration draft and
 > perform visual, interaction, accessibility, and LMS acceptance testing before
-> production use. Native CPTX assembly is represented by a documented job file,
-> but the Captivate automation adapter is not implemented yet.
+> production use. The initial Captivate adapter creates native slides and editable
+> title text only; assets, interactions, detailed layout, and unsupported text remain
+> explicit reconstruction work in the accompanying migration bundle. Native CPTX
+> export is currently a developer-local beta, not a generally enabled public feature.
 
 ## How it works
 
@@ -29,7 +31,7 @@ flowchart LR
   B --> C["Neutral course model"]
   C --> D["Per-slide migration bundle"]
   C --> E["HTML5 SCORM 1.2 ZIP"]
-  D --> F["Captivate authoring adapter — planned"]
+  D --> F["Captivate Classic 11.8.4 adapter"]
   F --> G["Editable CPTX"]
 ```
 
@@ -49,6 +51,10 @@ the source again.
   reference are carried into the slide folder as well.
 - Builds an HTML5 SCORM 1.2 ZIP with an `imsmanifest.xml` at its root, a standalone
   fallback, basic native interactions, navigation, scoring, bookmarking, and resume state.
+- Uses a locally qualified Adobe Captivate Classic `11.8.4.21` instance to create,
+  save, close, reopen, and verify an editable-text CPTX draft without modifying the
+  starter project. A supporting migration bundle is always retained for content that
+  is not yet mapped to native Captivate objects.
 - Provides a Windows-oriented desktop interface that follows light, dark, high-contrast,
   and reduced-transparency preferences without a browser UI framework.
 
@@ -81,6 +87,7 @@ npm.cmd start                   # Build and launch with the development Electron
 npm.cmd test                    # Unit tests
 npm.cmd run test:e2e            # Build and run the Playwright Electron workflow test
 npm.cmd run test:local-courses  # Read-only checks against ignored local samples
+npm.cmd run test:captivate-live # Explicit live Classic 11.8.4 authoring/close/reopen test
 npm.cmd run typecheck           # Main/preload/core and renderer TypeScript checks
 npm.cmd run build               # Production Electron build
 npm.cmd run package             # Signed unpacked app; signing credentials required
@@ -99,13 +106,34 @@ required or committed.
 2. Choose a published course folder. This may be the folder containing `run.hta`, the
    `Content` folder, `Projects`, `Res`, or the `project.xml` file itself.
 3. Review the recovered slide, question, interaction, asset, and Flash counts.
-4. Choose a destination and one or both working outputs:
+4. Choose a destination and one or more working outputs:
    - **Editable migration bundle** for reconstruction and audit;
    - **HTML5 SCORM 1.2** for an LMS-ready package draft.
+   - **Adobe Captivate (.cptx)** for an editable-text beta when the exact qualified
+     Classic build and starter project are detected.
 5. Review the export diagnostics and test the output.
 
-The native Captivate option remains disabled until its authoring adapter can create,
-save, reopen, and verify real `.cptx` files in a supported Captivate version.
+The initial native Captivate profile is deliberately narrow. It requires signed Adobe
+Captivate Classic build `11.8.4.21`, a SHA-256-pinned bundled driver, the exact one-slide
+starter project that passed local qualification, and the live-qualified Windows desktop
+profile: a DPI-unaware 96-DPI logical coordinate space on a 150% primary display with
+the Captivate authoring window at `0,0,1280,696`. By default the app checks
+`Documents\My Adobe Captivate Projects\untitled1.cptx`; developers may point to the
+same qualified seed with `COMPOS_A_TOAST_CAPTIVATE_SEED_CPTX`. A changed or unqualified
+starter remains disabled instead of risking a fabricated or corrupt CPTX. Captivate
+opens during export; leave it untouched until the adapter closes it normally. The app
+streams Captivate's current automation step while it runs. If it shows **Action needed
+in Adobe Captivate**, choose **Continue Trial** in the verified Adobe trial window (or
+**Continue Offline** if that is the label Adobe shows). Do not choose **Try Again** or
+close Captivate; leave all other controls untouched so automation can resume safely.
+The optional live integration test exercises the same complete sequence against a
+disposable four-slide project and requires author, save, clean close, reopen, XML
+marker verification, second clean close, output promotion, and an unchanged seed.
+
+The repository does not redistribute the locally qualified `.cptx` seed. Therefore a
+fresh public checkout or installation keeps native CPTX export disabled until a future
+in-app seed-qualification workflow is implemented. The migration-bundle and SCORM 1.2
+outputs do not depend on Captivate and remain available normally.
 
 ## Windows Smart App Control and signing
 
@@ -163,9 +191,9 @@ modern emulator and remain optional.
   audio/video timing, and complex feedback branches.
 - Add visual reference capture and pixel-difference QA without running unsafe legacy code.
 - Validate manifests and learner-state behavior against SCORM Cloud and target LMSs.
-- Add adapter contracts for multiple Adobe Captivate versions.
-- Automate native Captivate object creation, naming, quiz configuration, save/reopen,
-  and publish verification.
+- Add qualification profiles for more Adobe Captivate Classic builds and starter layouts.
+- Expand native Captivate creation from slides/title text to positioned text, media,
+  controls, quiz configuration, accessibility data, and publish verification.
 - Add accessible reconstruction alternatives for interactions that cannot map directly.
 
 See [Architecture](docs/architecture.md) and

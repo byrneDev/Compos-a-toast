@@ -924,6 +924,26 @@ input:disabled {
   line-height: 1.45;
 }
 
+.captivate-progress-message {
+  margin-top: 14px;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--stroke));
+  background: color-mix(in srgb, var(--accent) 6%, var(--card-background-solid));
+}
+
+.captivate-progress-message .message-icon {
+  background: var(--accent);
+  font-size: 9px;
+}
+
+.captivate-progress-message.is-action-needed {
+  border-color: color-mix(in srgb, var(--warning) 58%, var(--stroke));
+  background: color-mix(in srgb, var(--warning) 9%, var(--card-background-solid));
+}
+
+.captivate-progress-message.is-action-needed .message-icon {
+  background: var(--warning);
+}
+
 .result-section {
   margin-top: 40px;
 }
@@ -934,6 +954,22 @@ input:disabled {
 
 .success-title .page-kicker {
   color: var(--success);
+}
+
+.partial-title .section-number {
+  background: var(--warning);
+}
+
+.partial-title .page-kicker {
+  color: var(--warning);
+}
+
+.failure-title .section-number {
+  background: var(--danger);
+}
+
+.failure-title .page-kicker {
+  color: var(--danger);
 }
 
 .artifact-list {
