@@ -4,6 +4,7 @@ import { copyFile, mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { createWindowsPowerShellEnvironment } from '../src/core/captivate/adapter'
 
 interface DriverProcessResult {
   exitCode: number
@@ -66,7 +67,12 @@ function runDriverWithInvalidJob(): Promise<DriverProcessResult> {
         '-JobPath',
         syntacticallyValidButWrongSchemaJob
       ],
-      { encoding: 'utf8', windowsHide: true, timeout: 15_000 },
+      {
+        encoding: 'utf8',
+        env: createWindowsPowerShellEnvironment(powerShell),
+        windowsHide: true,
+        timeout: 15_000
+      },
       (error, stdout, stderr) => {
         const processError = error as (Error & { code?: string | number }) | null
         const exitCode =
@@ -134,7 +140,12 @@ try {
         '-EncodedCommand',
         encodedCommand
       ],
-      { encoding: 'utf8', windowsHide: true, timeout: 20_000 },
+      {
+        encoding: 'utf8',
+        env: createWindowsPowerShellEnvironment(powerShell),
+        windowsHide: true,
+        timeout: 20_000
+      },
       (error, stdout, stderr) => {
         const processError = error as (Error & { code?: string | number }) | null
         const exitCode =
@@ -217,7 +228,12 @@ async function runAccessibilityHelperWithInvalidWindow(
         '-AccessibilityExpectedDriverSha256',
         expectedDriverSha256Override ?? expectedDriverSha256
       ],
-      { encoding: 'utf8', windowsHide: true, timeout: 15_000 },
+      {
+        encoding: 'utf8',
+        env: createWindowsPowerShellEnvironment(powerShell),
+        windowsHide: true,
+        timeout: 15_000
+      },
       (error, stdout, stderr) => {
         const processError = error as (Error & { code?: string | number }) | null
         const exitCode =
@@ -345,7 +361,12 @@ try {
         '-EncodedCommand',
         encodedCommand
       ],
-      { encoding: 'utf8', windowsHide: true, timeout: 25_000 },
+      {
+        encoding: 'utf8',
+        env: createWindowsPowerShellEnvironment(powerShell),
+        windowsHide: true,
+        timeout: 25_000
+      },
       (error, stdout, stderr) => {
         const processError = error as (Error & { code?: string | number }) | null
         const exitCode =

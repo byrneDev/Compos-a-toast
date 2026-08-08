@@ -22,7 +22,8 @@ import {
   join,
   relative,
   resolve,
-  sep
+  sep,
+  win32
 } from 'node:path'
 import AdmZip from 'adm-zip'
 import type { CourseModel, ExportedArtifact } from '../model'
@@ -694,6 +695,7 @@ function runPowerShellDriver(
       ],
       {
         encoding: 'utf8',
+        env: createWindowsPowerShellEnvironment(powerShellPath),
         windowsHide: true,
         maxBuffer: 2 * 1024 * 1024,
         // Electron directs this broad watchdog only at the spawned PowerShell process.
@@ -964,6 +966,20 @@ async function chooseAvailableOutputPath(outputRoot: string, requestedName: stri
     }
   }
   throw new Error('Could not choose an unused CPTX output filename.')
+}
+
+export function createWindowsPowerShellEnvironment(
+  powerShellPath: string,
+  sourceEnvironment: NodeJS.ProcessEnv = process.env
+): NodeJS.ProcessEnv {
+  const environment = { ...sourceEnvironment }
+  // PowerShell 7 rewrites PSModulePath with entries that Windows PowerShell 5.1
+  // cannot load. Pin the qualified driver to 5.1's signed system modules instead.
+  for (const key of Object.keys(environment)) {
+    if (key.toLowerCase() === 'psmodulepath') delete environment[key]
+  }
+  environment.PSModulePath = win32.join(win32.dirname(powerShellPath), 'Modules')
+  return environment
 }
 
 function windowsPowerShellPath(): string {

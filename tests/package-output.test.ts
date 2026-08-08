@@ -10,6 +10,7 @@ import {
 } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { finished } from 'node:stream/promises'
 import { createPackage } from '@electron/asar'
 import { afterEach, describe, expect, it } from 'vitest'
 // @ts-expect-error The executable ESM script intentionally has no generated declaration file.
@@ -96,7 +97,7 @@ async function packageFixture(options: PackageFixtureOptions = {}): Promise<{
       'utf8'
     )
   }
-  await createPackage(asarInput, appAsarPath)
+  await finished(await createPackage(asarInput, appAsarPath))
 
   return { appAsarPath, packagedDriverPath, root, sourceDriverHash }
 }

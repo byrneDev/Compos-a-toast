@@ -11,6 +11,7 @@ import {
   CAPTIVATE_CLASSIC_DRIVER_TIMEOUT_MS,
   CAPTIVATE_EXPORT_RESERVATION_PIPE,
   acquireCaptivateSystemReservation,
+  createWindowsPowerShellEnvironment,
   createCaptivateProgressStreamParser,
   createCaptivateDraftSlides,
   exportCaptivateEditableDraft,
@@ -198,6 +199,23 @@ function fakeSuccessfulDependencies(seedHash: string): CaptivateAdapterDependenc
 }
 
 describe('Captivate Classic adapter qualification', () => {
+  it('pins Windows PowerShell to its trusted module directory', () => {
+    const powerShellPath = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'
+    const environment = createWindowsPowerShellEnvironment(powerShellPath, {
+      Path: 'C:\\Windows\\System32',
+      PSModulePath: 'C:\\Program Files\\PowerShell\\7\\Modules',
+      psmodulepath: 'C:\\untrusted-modules'
+    })
+
+    expect(environment.Path).toBe('C:\\Windows\\System32')
+    expect(
+      Object.keys(environment).filter((key) => key.toLowerCase() === 'psmodulepath')
+    ).toEqual(['PSModulePath'])
+    expect(environment.PSModulePath).toBe(
+      'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\Modules'
+    )
+  })
+
   it('uses a broad direct-PowerShell watchdog without a Captivate tree kill', async () => {
     const source = await readFile(resolve('src/core/captivate/adapter.ts'), 'utf8')
 
