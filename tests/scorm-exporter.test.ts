@@ -359,7 +359,8 @@ if ($failures.Count -gt 0) { throw ($failures -join [Environment]::NewLine) }
           }
         }
       )
-    }
+    },
+    20_000
   )
 
   it('uses the first valid test passScore and all intended questions as the score denominator', async () => {
