@@ -3,7 +3,7 @@
 All notable changes to Compos-a-toast will be documented here. The project follows
 [Semantic Versioning](https://semver.org/) once public releases begin.
 
-## 0.1.0 - Unreleased
+## 0.5.0 - Unreleased
 
 ### Added
 

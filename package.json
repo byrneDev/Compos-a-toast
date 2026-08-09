@@ -1,6 +1,6 @@
 {
   "name": "compos-a-toast",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
   "description": "A desktop migration workbench for extracting legacy Composica courses into editable bundles, HTML5 SCORM 1.2 packages, and editable-text Captivate drafts.",
   "main": "./out/main/index.js",

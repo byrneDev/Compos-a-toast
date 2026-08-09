@@ -66,7 +66,7 @@ test('analyzes a course and exports bundle and SCORM while unverified Captivate 
     await electronApp.evaluate(({ ipcMain }) => {
       ipcMain.removeHandler('app:environment')
       ipcMain.handle('app:environment', () => ({
-        appVersion: '0.1.0',
+        appVersion: '0.5.0',
         platform: 'win32',
         captivate: {
           detected: true,
@@ -166,7 +166,7 @@ test('enables and submits Captivate only when its adapter is ready for the insta
     await electronApp.evaluate(({ ipcMain }) => {
       ipcMain.removeHandler('app:environment')
       ipcMain.handle('app:environment', () => ({
-        appVersion: '0.1.0',
+        appVersion: '0.5.0',
         platform: 'win32',
         captivate: {
           detected: true,

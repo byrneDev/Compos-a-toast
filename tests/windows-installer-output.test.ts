@@ -37,11 +37,11 @@ async function installerFixture(options: InstallerFixtureOptions = {}): Promise<
   const root = await temporaryProject()
   const releasePath = join(root, 'release')
   const unpackedPath = join(releasePath, 'win-unpacked')
-  const installerPath = join(releasePath, 'Compos-a-toast-Setup-0.1.0-x64.exe')
+  const installerPath = join(releasePath, 'Compos-a-toast-Setup-0.5.0-x64.exe')
   const appExecutablePath = join(unpackedPath, 'Compos-a-toast.exe')
   const packageMetadata = {
     name: 'compos-a-toast',
-    version: '0.1.0',
+    version: '0.5.0',
     build: {
       productName: 'Compos-a-toast',
       nsis: {
@@ -101,13 +101,13 @@ describe('Windows installer output verification', () => {
   it('rejects an additional top-level executable as a possible portable artifact', async () => {
     const fixture = await installerFixture()
     await writeFile(
-      join(fixture.releasePath, 'Compos-a-toast-0.1.0-portable.exe'),
+      join(fixture.releasePath, 'Compos-a-toast-0.5.0-portable.exe'),
       'synthetic portable executable',
       'utf8'
     )
 
     await expect(verifyWindowsInstallerOutput(fixture.root)).rejects.toThrow(
-      /portable target may have been emitted.*Compos-a-toast-0\.1\.0-portable\.exe/i
+      /portable target may have been emitted.*Compos-a-toast-0\.5\.0-portable\.exe/i
     )
   })
 
