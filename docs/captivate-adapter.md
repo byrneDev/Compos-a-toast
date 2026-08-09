@@ -26,7 +26,7 @@ not mean native CPTX export is ready. Readiness additionally requires the packag
 driver and the exact SHA-256-qualified one-slide starter project. A changed seed or a
 different build leaves the product option disabled.
 
-The current `classic-11.8.4.21-primary150-unaware-1280x696-v3` profile creates one native
+The current `classic-11.8.4.21-primary150-unaware-1280x696-v4` profile creates one native
 slide for each recovered source slide, editable title text on every slide, and a first-slide subtitle.
 Images, interactions, detailed layout/styling, and remaining text stay in the migration
 bundle as explicit manual-review work.
@@ -64,6 +64,8 @@ The mature adapter contract must eventually:
 The initial profile implements steps 1, 3, 5, 6, and native slide/title portions of
 steps 2 and 7. It exports and hashes Captivate XML after reopening to verify native
 marker titles. It does not yet claim media, controls, quizzes, or publish verification.
+Profile v4 completed a 17-slide live trial-mode qualification on 2026-08-09, including
+native authoring, save, normal close, reopen, XML marker verification, and final promotion.
 
 ## Unsupported mappings
 
@@ -84,6 +86,8 @@ Live inspection of Captivate Classic `11.8.4.21` established these constraints:
 - standard UI Automation exposes the top-level window but not its useful descendants;
 - native Win32 menu popups expose stable positions and labels, while their leaf command
   IDs can change between launches and therefore cannot be used as identity;
+- native text editing exposes one of two exact clipboard-dependent context menus: an
+  eight-row profile without Paste or a nine-row profile with enabled Paste;
 - menus and dialogs are transient and must be reacquired and revalidated after they open;
 - window handles are ephemeral; every fixed physical cursor point must hit-test against
   the expected exact window, in addition to asserted authoring/popup geometry;
@@ -163,7 +167,8 @@ Most progress is informational and Captivate must be left untouched. When the ve
 Adobe trial reminder requires manual confirmation, the driver enters the
 `await-continue-trial` stage. Electron maps that stage to the semantic
 `TRIAL_REMINDER_REQUIRES_USER_ACTION` UI event. The app shows **Action needed in Adobe
-Captivate** and asks the user to choose **Continue Trial** in the verified Adobe trial
-window, or **Continue Offline** if Adobe uses that label. The user must not choose
-**Try Again**, close Captivate, or touch other controls while the driver continues. A
-terminal driver failure still appears with the affected export artifact.
+Captivate** and asks the user to single-click **Continue Trial** once in the verified
+Adobe trial window, or **Continue Offline** if Adobe uses that label. After that click,
+the user must leave the mouse and keyboard untouched while the driver observes Adobe's
+handoff and resumes automatically. The user must not choose **Try Again** or close either
+app. A terminal driver failure still appears with the affected export artifact.

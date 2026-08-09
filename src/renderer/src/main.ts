@@ -67,6 +67,7 @@ const elements = {
   buildOutputs: requiredElement<HTMLButtonElement>('build-outputs'),
   idleBuildLabel: document.querySelector<HTMLSpanElement>('.button-idle-label')!,
   busyBuildLabel: document.querySelector<HTMLSpanElement>('.button-busy-label')!,
+  busyBuildText: requiredElement<HTMLSpanElement>('button-busy-text'),
   analysisProgress: requiredElement<HTMLDivElement>('analysis-progress'),
   recognizedLabel: requiredElement<HTMLSpanElement>('recognized-label'),
   analysisSummary: requiredElement<HTMLElement>('analysis-summary'),
@@ -390,6 +391,12 @@ function render(): void {
   elements.analysisProgress.hidden = state.busy !== 'analyzing'
   elements.idleBuildLabel.hidden = state.busy === 'exporting'
   elements.busyBuildLabel.hidden = state.busy !== 'exporting'
+  setText(
+    elements.busyBuildText,
+    state.captivateProgress?.requiresUserAction
+      ? 'Waiting for Continue Trial…'
+      : 'Converting…'
+  )
 
   const statusText: Record<BusyState, string> = {
     idle: state.result ? 'Complete' : state.summary ? 'Course recognized' : 'Ready',
@@ -605,8 +612,15 @@ const removeQuitDeferredListener = window.composAToast.onQuitDeferred((message) 
 })
 const removeCaptivateProgressListener = window.composAToast.onCaptivateProgress((progress) => {
   if (state.busy !== 'exporting') return
+  const actionPromptBecameVisible =
+    progress.requiresUserAction && state.captivateProgress?.requiresUserAction !== true
   state.captivateProgress = progress
   render()
+  if (actionPromptBecameVisible) {
+    requestAnimationFrame(() =>
+      elements.captivateProgressMessage.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    )
+  }
 })
 window.addEventListener('beforeunload', removeQuitDeferredListener, { once: true })
 window.addEventListener('beforeunload', removeCaptivateProgressListener, { once: true })

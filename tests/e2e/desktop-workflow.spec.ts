@@ -199,7 +199,7 @@ test('enables and submits Captivate only when its adapter is ready for the insta
         event.sender.send('app:captivate-progress', {
           stage: 'TRIAL_REMINDER_REQUIRES_USER_ACTION',
           message:
-            'In the verified Adobe Captivate trial window, choose Continue Trial (or Continue Offline if that is the label Adobe shows). Do not choose Try Again or close Captivate.',
+            'In the verified Adobe Captivate trial window, single-click Continue Trial once (or Continue Offline if that is the label Adobe shows). Then do not use the mouse or keyboard—Compos-a-toast will continue automatically. Do not choose Try Again or close either app.',
           requiresUserAction: true
         })
         await new Promise((resolvePromise) => setTimeout(resolvePromise, 750))
@@ -239,9 +239,10 @@ test('enables and submits Captivate only when its adapter is ready for the insta
     ).toBeVisible()
     await expect(
       page.getByText(
-        'In the verified Adobe Captivate trial window, choose Continue Trial (or Continue Offline if that is the label Adobe shows). Do not choose Try Again or close Captivate.'
+        'In the verified Adobe Captivate trial window, single-click Continue Trial once (or Continue Offline if that is the label Adobe shows). Then do not use the mouse or keyboard—Compos-a-toast will continue automatically. Do not choose Try Again or close either app.'
       )
     ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Waiting for Continue Trial…' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Conversion finished.' })).toBeVisible()
 
     const submittedTargets = await electronApp.evaluate(() => {

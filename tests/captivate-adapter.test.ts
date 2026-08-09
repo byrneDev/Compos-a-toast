@@ -145,7 +145,7 @@ function fakeSuccessfulDependencies(seedHash: string): CaptivateAdapterDependenc
         mode: job.mode,
         stage: 'complete',
         attestation: {
-          driverProfile: 'classic-11.8.4.21-primary150-unaware-1280x696-v3',
+          driverProfile: 'classic-11.8.4.21-primary150-unaware-1280x696-v4',
           desktop: {
             processDpiAwareness: 0,
             logicalDpi: 96,

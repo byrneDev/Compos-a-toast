@@ -61,7 +61,7 @@ $script:DriverScriptPath = [IO.Path]::GetFullPath($PSCommandPath)
 $script:DriverStartupSha256 = (Get-FileHash -LiteralPath $script:DriverScriptPath -Algorithm SHA256).Hash.ToLowerInvariant()
 
 $script:DriverSchemaVersion = 1
-$script:DriverProfile = 'classic-11.8.4.21-primary150-unaware-1280x696-v3'
+$script:DriverProfile = 'classic-11.8.4.21-primary150-unaware-1280x696-v4'
 $script:ExpectedCaptivateVersion = '11.8.4.21'
 $script:QualifiedSeedSha256 = 'b7869c12cc6ea006d96a19592db69425bc3c51f18245f008aa1013c7949ce60b'
 $script:ExpectedWorkingWidth = 1280
@@ -1192,14 +1192,23 @@ public static class CatNative
         return items.ToArray();
     }
 
-    public static bool ClickPopupMenuPosition(long hwnd, int position)
+    public static bool ClickPopupMenuPosition(long hwnd, int expectedProcessId, int position, int expectedCount, long expectedId, string expectedText, long expectedState, int expectedHeight)
     {
         IntPtr popup = new IntPtr(hwnd);
+        if (!IsWindow(popup) || (expectedHeight != 156 && expectedHeight != 178)) return false;
+        CatWindowInfo current = Describe(popup);
+        if (current.Hwnd != hwnd || current.ProcessId != expectedProcessId || !current.Visible || !current.Enabled ||
+            !String.Equals(current.ClassName, "#32768", StringComparison.Ordinal) || !String.Equals(current.Text, String.Empty, StringComparison.Ordinal) ||
+            current.Width != 227 || current.Height != expectedHeight || current.Owner != 0) return false;
         IntPtr menu;
         IntPtr call = SendMessageTimeout(popup, MN_GETHMENU, IntPtr.Zero, IntPtr.Zero, SMTO_ABORTIFHUNG | SMTO_ERRORONEXIT, 2000, out menu);
         if (call == IntPtr.Zero || menu == IntPtr.Zero || !IsMenu(menu)) return false;
         int count = GetMenuItemCount(menu);
-        if (position < 0 || position >= count) return false;
+        if (count != expectedCount || position < 0 || position >= count) return false;
+        StringBuilder text = new StringBuilder(512);
+        GetMenuString(menu, (uint)position, text, text.Capacity, MF_BYPOSITION);
+        if ((long)GetMenuItemID(menu, position) != expectedId || !String.Equals(text.ToString(), expectedText, StringComparison.Ordinal) ||
+            (long)GetMenuState(menu, (uint)position, MF_BYPOSITION) != expectedState || GetSubMenu(menu, position) != IntPtr.Zero) return false;
         RECT rect;
         if (!GetMenuItemRect(popup, menu, (uint)position, out rect) || rect.Right <= rect.Left || rect.Bottom <= rect.Top) return false;
         int x = rect.Left + ((rect.Right - rect.Left) / 2);
@@ -1859,7 +1868,7 @@ function Confirm-TextEditContextAndSelectAll {
   $popup = Wait-Until -TimeoutMilliseconds 5000 -PollMilliseconds 100 -Condition {
     $visibleTopWindows = @(Get-VisibleTopWindows -ProcessId $ProcessId)
     $matches = @($visibleTopWindows | Where-Object {
-        $_.Hwnd -ne $MainHwnd -and $_.ClassName -eq '#32768' -and $_.Text -eq '' -and $_.Visible -and $_.Enabled -and $_.Width -eq 227 -and $_.Height -eq 156 -and $_.Owner -eq 0
+        $_.Hwnd -ne $MainHwnd -and $_.ClassName -eq '#32768' -and $_.Text -eq '' -and $_.Visible -and $_.Enabled -and $_.Width -eq 227 -and $_.Height -in @(156, 178) -and $_.Owner -eq 0
       })
     if ($matches.Count -eq 1) { return $matches[0] }
     if ($matches.Count -gt 1) { Stop-Driver -Code 'AMBIGUOUS_TEXT_EDIT_CONTEXT_MENU' -Message 'More than one qualified Captivate text-edit context menu appeared.' }
@@ -1874,10 +1883,11 @@ function Confirm-TextEditContextAndSelectAll {
   Assert-NoUnexpectedTopWindow -ProcessId $ProcessId -MainHwnd $MainHwnd -AllowedHandles @($popup.Hwnd) -AllowedClasses @('tooltips_class32')
 
   $items = @([CatNative]::MenuItemsForPopup($popup.Hwnd))
-  # Captivate assigns the six leaf command IDs dynamically between launches.
-  # The qualified proof pins exact positions, labels, states, separators,
-  # submenu absence, popup geometry, and distinct nonzero leaf IDs.
-  $expected = @(
+  # Captivate assigns the leaf command IDs dynamically between launches and
+  # conditionally exposes an enabled Paste row when compatible clipboard data
+  # is available. Both qualified profiles pin exact positions, labels, states,
+  # separators, submenu absence, popup geometry, and distinct nonzero leaf IDs.
+  $expectedWithoutPaste = @(
     [PSCustomObject]@{ Position = 0; Id = -1; Text = "Cu&t`tCtrl+X"; State = 0 },
     [PSCustomObject]@{ Position = 1; Id = -1; Text = "&Copy`tCtrl+C"; State = 0 },
     [PSCustomObject]@{ Position = 2; Id = -1; Text = 'Copy Appearance'; State = 0 },
@@ -1887,7 +1897,23 @@ function Confirm-TextEditContextAndSelectAll {
     [PSCustomObject]@{ Position = 6; Id = 4294967295; Text = ''; State = 2048 },
     [PSCustomObject]@{ Position = 7; Id = -1; Text = 'Insert Hyperlink'; State = 0 }
   )
-  Assert-Condition -Condition ($items.Count -eq $expected.Count) -Code 'TEXT_EDIT_CONTEXT_MENU_PROFILE_CHANGED' -Message "The $Label context menu did not contain the eight qualified native text-edit rows; no text input was sent."
+  $expectedWithPaste = @(
+    [PSCustomObject]@{ Position = 0; Id = -1; Text = "Cu&t`tCtrl+X"; State = 0 },
+    [PSCustomObject]@{ Position = 1; Id = -1; Text = "&Copy`tCtrl+C"; State = 0 },
+    [PSCustomObject]@{ Position = 2; Id = -1; Text = "&Paste`tCtrl+V"; State = 0 },
+    [PSCustomObject]@{ Position = 3; Id = -1; Text = 'Copy Appearance'; State = 0 },
+    [PSCustomObject]@{ Position = 4; Id = -1; Text = "&Delete`tDel"; State = 0 },
+    [PSCustomObject]@{ Position = 5; Id = 4294967295; Text = ''; State = 2048 },
+    [PSCustomObject]@{ Position = 6; Id = -1; Text = "S&elect All`tCtrl+A"; State = 0 },
+    [PSCustomObject]@{ Position = 7; Id = 4294967295; Text = ''; State = 2048 },
+    [PSCustomObject]@{ Position = 8; Id = -1; Text = 'Insert Hyperlink'; State = 0 }
+  )
+  $pasteProfile = $popup.Height -eq 178
+  $expected = if ($pasteProfile) { $expectedWithPaste } else { $expectedWithoutPaste }
+  $separatorPositions = if ($pasteProfile) { @(5, 7) } else { @(4, 6) }
+  $selectAllPosition = if ($pasteProfile) { 6 } else { 5 }
+  $expectedLeafCount = if ($pasteProfile) { 7 } else { 6 }
+  Assert-Condition -Condition ($items.Count -eq $expected.Count) -Code 'TEXT_EDIT_CONTEXT_MENU_PROFILE_CHANGED' -Message "The $Label context menu did not contain one of the two qualified native text-edit row profiles; no text input was sent."
   foreach ($definition in $expected) {
     $matches = @($items | Where-Object { $_.Position -eq $definition.Position })
     if ($matches.Count -ne 1) {
@@ -1898,11 +1924,34 @@ function Confirm-TextEditContextAndSelectAll {
     $valid = $idMatches -and $item.Text -ceq $definition.Text -and [long]$item.State -eq [long]$definition.State -and $item.HasSubmenu -eq $false
     Assert-Condition -Condition $valid -Code 'TEXT_EDIT_CONTEXT_MENU_PROFILE_CHANGED' -Message "The $Label context menu position $($definition.Position) did not match the qualified text-edit command; no text input was sent."
   }
-  $leafIds = @($items | Where-Object { $_.Position -notin @(4, 6) } | ForEach-Object { [long]$_.Id })
+  $leafIds = @($items | Where-Object { $_.Position -notin $separatorPositions } | ForEach-Object { [long]$_.Id })
   $distinctLeafIds = @($leafIds | Sort-Object -Unique)
-  Assert-Condition -Condition ($leafIds.Count -eq 6 -and $distinctLeafIds.Count -eq 6) -Code 'TEXT_EDIT_CONTEXT_MENU_PROFILE_CHANGED' -Message "The $Label context menu leaf command IDs were not distinct; no text input was sent."
+  Assert-Condition -Condition ($leafIds.Count -eq $expectedLeafCount -and $distinctLeafIds.Count -eq $expectedLeafCount) -Code 'TEXT_EDIT_CONTEXT_MENU_PROFILE_CHANGED' -Message "The $Label context menu leaf command IDs were not distinct; no text input was sent."
 
-  Assert-Condition -Condition ([CatNative]::ClickPopupMenuPosition($popup.Hwnd, 5)) -Code 'TEXT_EDIT_SELECT_ALL_REJECTED' -Message "The qualified Select All text command could not be invoked for $Label; no text input was sent."
+  $currentPopup = Get-WindowInfoWithoutText -Hwnd $popup.Hwnd
+  $popupUnchanged = $null -ne $currentPopup -and $currentPopup.Hwnd -eq $popup.Hwnd -and $currentPopup.ProcessId -eq $ProcessId -and
+    $currentPopup.ClassName -eq '#32768' -and $currentPopup.Visible -and $currentPopup.Enabled -and $currentPopup.Left -eq $popup.Left -and
+    $currentPopup.Top -eq $popup.Top -and $currentPopup.Width -eq 227 -and $currentPopup.Height -eq $popup.Height -and $currentPopup.Owner -eq 0
+  Assert-Condition -Condition $popupUnchanged -Code 'TEXT_EDIT_CONTEXT_MENU_CHANGED_BEFORE_SELECT_ALL' -Message "The qualified $Label context menu identity or geometry changed before Select All; no menu input was sent."
+  Assert-NoUnexpectedTopWindow -ProcessId $ProcessId -MainHwnd $MainHwnd -AllowedHandles @($popup.Hwnd) -AllowedClasses @('tooltips_class32')
+  $revalidatedItems = @([CatNative]::MenuItemsForPopup($popup.Hwnd))
+  Assert-Condition -Condition ($revalidatedItems.Count -eq $items.Count) -Code 'TEXT_EDIT_CONTEXT_MENU_CHANGED_BEFORE_SELECT_ALL' -Message "The qualified $Label context-menu row count changed before Select All; no menu input was sent."
+  foreach ($originalItem in $items) {
+    $currentMatches = @($revalidatedItems | Where-Object { $_.Position -eq $originalItem.Position })
+    if ($currentMatches.Count -ne 1) {
+      Stop-Driver -Code 'TEXT_EDIT_CONTEXT_MENU_CHANGED_BEFORE_SELECT_ALL' -Message "The qualified $Label context-menu position $($originalItem.Position) changed before Select All; no menu input was sent."
+    }
+    $currentItem = $currentMatches[0]
+    $sameItem = [long]$currentItem.Id -eq [long]$originalItem.Id -and $currentItem.Text -ceq $originalItem.Text -and
+      [long]$currentItem.State -eq [long]$originalItem.State -and $currentItem.HasSubmenu -eq $originalItem.HasSubmenu
+    Assert-Condition -Condition $sameItem -Code 'TEXT_EDIT_CONTEXT_MENU_CHANGED_BEFORE_SELECT_ALL' -Message "The qualified $Label context-menu position $($originalItem.Position) changed before Select All; no menu input was sent."
+  }
+  $selectAllMatches = @($revalidatedItems | Where-Object { $_.Position -eq $selectAllPosition })
+  Assert-Condition -Condition ($selectAllMatches.Count -eq 1) -Code 'TEXT_EDIT_CONTEXT_MENU_CHANGED_BEFORE_SELECT_ALL' -Message "The qualified $Label Select All row changed before selection; no menu input was sent."
+  $selectAllItem = $selectAllMatches[0]
+  Add-AuditRecord -Stage $script:Stage -Message "Accepted the exact 227 x $($popup.Height) native $Label text-edit menu profile after semantic revalidation."
+
+  Assert-Condition -Condition ([CatNative]::ClickPopupMenuPosition($popup.Hwnd, $ProcessId, $selectAllPosition, $expected.Count, [long]$selectAllItem.Id, [string]$selectAllItem.Text, [long]$selectAllItem.State, $popup.Height)) -Code 'TEXT_EDIT_SELECT_ALL_REJECTED' -Message "The qualified Select All text command could not be invoked for $Label; no text input was sent."
   $closed = Wait-Until -TimeoutMilliseconds 5000 -PollMilliseconds 100 -Condition {
     -not [CatNative]::IsWindow([IntPtr]$popup.Hwnd) -or -not [CatNative]::IsWindowVisible([IntPtr]$popup.Hwnd)
   }

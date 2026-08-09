@@ -37,6 +37,14 @@ All notable changes to Compos-a-toast will be documented here. The project follo
   pull-request safety checks, support guidance, and third-party notices.
 - Synthetic unit fixtures and an optional read-only seven-course local integration suite.
 
+### Changed
+
+- Trial-mode Captivate exports now emphasize a single Continue Trial click, keep the
+  action checkpoint visible, and show a dedicated waiting state while automation pauses.
+- Captivate text editing now recognizes only the two exact clipboard-dependent native
+  context menus (with or without enabled Paste), revalidates the full menu immediately
+  before Select All, and has completed a 17-slide save/reopen/XML live qualification.
+
 ### Known limitations
 
 - Native CPTX output currently covers slides and editable title text only. Images,

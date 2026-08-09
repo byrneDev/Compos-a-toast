@@ -19,7 +19,7 @@ describe('Captivate progress presentation', () => {
       stage: 'await-continue-trial',
       code: CAPTIVATE_TRIAL_ACTION_CODE,
       message:
-        'In the verified Adobe Captivate trial window, choose Continue Trial (or Continue Offline if that is the label Adobe shows). Do not choose Try Again or close Captivate.',
+        'In the verified Adobe Captivate trial window, single-click Continue Trial once (or Continue Offline if that is the label Adobe shows). Then do not use the mouse or keyboard—Compos-a-toast will continue automatically. Do not choose Try Again or close either app.',
       requiresUserAction: true
     })
   })
@@ -35,7 +35,7 @@ describe('Captivate progress presentation', () => {
     ).toMatchObject({
       code: CAPTIVATE_TRIAL_ACTION_CODE,
       message:
-        'In the verified Adobe Captivate trial window, choose Continue Trial (or Continue Offline if that is the label Adobe shows). Do not choose Try Again or close Captivate.',
+        'In the verified Adobe Captivate trial window, single-click Continue Trial once (or Continue Offline if that is the label Adobe shows). Then do not use the mouse or keyboard—Compos-a-toast will continue automatically. Do not choose Try Again or close either app.',
       requiresUserAction: true
     })
   })
@@ -55,7 +55,7 @@ describe('Captivate progress presentation', () => {
       stage: 'licensing-handoff',
       code: 'trial-reminder-requires-user-action',
       message:
-        'In the verified Adobe Captivate trial window, choose Continue Trial (or Continue Offline if that is the label Adobe shows). Do not choose Try Again or close Captivate.',
+        'In the verified Adobe Captivate trial window, single-click Continue Trial once (or Continue Offline if that is the label Adobe shows). Then do not use the mouse or keyboard—Compos-a-toast will continue automatically. Do not choose Try Again or close either app.',
       requiresUserAction: true,
       timestamp: '2026-08-07T12:00:00.000Z'
     })

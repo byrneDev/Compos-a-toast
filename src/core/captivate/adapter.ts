@@ -36,17 +36,17 @@ import type {
 export const CAPTIVATE_CLASSIC_ADAPTER_ID =
   'captivate-classic-11.8.4-editable-text-draft-v1'
 export const CAPTIVATE_CLASSIC_ADAPTER_BUILD = '11.8.4.21'
-export const CAPTIVATE_CLASSIC_ADAPTER_VERIFIED_AT = '2026-08-08T12:47:24.536Z'
+export const CAPTIVATE_CLASSIC_ADAPTER_VERIFIED_AT = '2026-08-09T20:58:03.314Z'
 export const CAPTIVATE_CLASSIC_QUALIFIED_SEED_SHA256 =
   'b7869c12cc6ea006d96a19592db69425bc3c51f18245f008aa1013c7949ce60b'
 export const CAPTIVATE_CLASSIC_DRIVER_SHA256 =
-  'b2965ace9ce2955399c80345a38f1c0703309c49ef14c5e3021dc3a8be546605'
+  'c769900d1735ffa621950f4b756d92979486982aa2361a269df98e6ae41d9a43'
 export const CAPTIVATE_CLASSIC_DRIVER_TIMEOUT_MS = 4 * 60 * 60 * 1000
 export const CAPTIVATE_EXPORT_RESERVATION_PIPE =
   '\\\\.\\pipe\\compos-a-toast-captivate-native-export-v1'
 
 const DRIVER_SCHEMA_VERSION = 1
-const DRIVER_PROFILE = 'classic-11.8.4.21-primary150-unaware-1280x696-v3'
+const DRIVER_PROFILE = 'classic-11.8.4.21-primary150-unaware-1280x696-v4'
 const REQUIRED_CPTX_ENTRIES = ['info.cpi', 'objects/objects.cpo', 'text.cptd'] as const
 const CAPTIVATE_CLASSIC_DRIVER_KILL_SIGNAL: NodeJS.Signals = 'SIGTERM'
 const CAPTIVATE_EXPORT_BUSY_MESSAGE =

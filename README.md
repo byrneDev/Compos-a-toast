@@ -128,9 +128,10 @@ same qualified seed with `COMPOS_A_TOAST_CAPTIVATE_SEED_CPTX`. A changed or unqu
 starter remains disabled instead of risking a fabricated or corrupt CPTX. Captivate
 opens during export; leave it untouched until the adapter closes it normally. The app
 streams Captivate's current automation step while it runs. If it shows **Action needed
-in Adobe Captivate**, choose **Continue Trial** in the verified Adobe trial window (or
-**Continue Offline** if that is the label Adobe shows). Do not choose **Try Again** or
-close Captivate; leave all other controls untouched so automation can resume safely.
+in Adobe Captivate**, single-click **Continue Trial** once in the verified Adobe trial
+window (or **Continue Offline** if that is the label Adobe shows), then leave the mouse
+and keyboard untouched. Do not choose **Try Again** or close either app; automation
+resumes by itself after Adobe's licensing window exits and Captivate stabilizes.
 The optional live integration test exercises the same complete sequence against a
 disposable four-slide project and requires author, save, clean close, reopen, XML
 marker verification, second clean close, output promotion, and an unchanged seed.
